@@ -2,18 +2,17 @@ package com.example.aggrogahu.popularmovies;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-
-import com.squareup.picasso.Picasso;
+import android.widget.GridView;
 
 
 public class MoviesFragment extends Fragment {
 
     private final String LOG_TAG = MoviesFragment.class.getSimpleName();
+
+    private MovieAdapter mMovieAdapter;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -41,22 +40,35 @@ public class MoviesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
+        // TODO: Initialize adapter
+//        mMovieAdapter = new MovieAdapter(getContext());//(getActivity(),R.layout.grid_item_movie,R.id.grid_item_movie_imageview,new ArrayList<ImageView>());
 
-        // Testing API
-        // Testing Picasso
-        ImageView view = new ImageView(getActivity());
-        //ImageView view = (ImageView)getActivity().findViewById(R.id.imageView);
-        if(view == null){
-            Log.d(LOG_TAG, "onCreateView: welp");
-        }else{
-            Picasso.with(getActivity()).load("http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg").into(view);
-        }
+        // Find Grid View
+        GridView myGridView = (GridView) rootView.findViewById(R.id.gridview_movies);
 
         // TODO: Setup adapter
+        mMovieAdapter = new MovieAdapter(getActivity());
+        myGridView.setAdapter(mMovieAdapter);
+
+        // Dummy data to test
+//        ImageView iv = new ImageView(getContext());
+//        iv.setImageResource(R.drawable.interstellar);
+//        mMovieAdapter.add(iv);
+
+        // Picasso test
+//        ImageView iv = new ImageView(getActivity());
+//        Picasso.with(getActivity()).load("http://i.imgur.com/DvpvklR.png").into(iv);
+//        mMovieAdapter.add(iv);
+//        Log.v("Adapter Count", "Count" + mMovieAdapter.getCount());
+        mMovieAdapter.notifyDataSetChanged();
+
+
 
 
         // TODO: create intent and launch movie details page
-        return inflater.inflate(R.layout.fragment_movies, container, false);
+        //return inflater.inflate(R.layout.fragment_detail, container, false);
+        return rootView;
     }
 }

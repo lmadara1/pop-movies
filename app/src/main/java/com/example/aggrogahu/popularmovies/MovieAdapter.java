@@ -1,59 +1,74 @@
 package com.example.aggrogahu.popularmovies;
 
-import android.app.Activity;
-import android.view.LayoutInflater;
+import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.List;
-
 /**
- * Created by Leonard Madarang on 6/12/2016.
- * Using concepts from https://github.com/udacity/android-custom-arrayadapter/blob/master/app/src/main/java/demo/example/com/customarrayadapter/AndroidFlavorAdapter.java
+ * Created by aggrogahu on 7/23/2016.
  */
-public class MovieAdapter extends ArrayAdapter<Movie>{
-    private static final String LOG_TAG = MovieAdapter.class.getSimpleName();
+public class MovieAdapter extends BaseAdapter {
+    private Context mContext;
 
-    public MovieAdapter(Activity context, List<Movie> movies){
-        super(context,0,movies);
+    public MovieAdapter(Context c) {
+        mContext = c;
     }
 
-    @Override
+    public int getCount() {
+        return mThumbIds.length;
+    }
+
+    public Object getItem(int position) {
+        return null;
+    }
+
+    public long getItemId(int position) {
+        return 0;
+    }
+
+    // create a new ImageView for each item referenced by the Adapter
     public View getView(int position, View convertView, ViewGroup parent) {
-
-        Movie movie = getItem(position);
-
-        if(convertView == null){
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.list_item_movie, parent, false);
+        ImageView imageView;
+        if (convertView == null) {
+            // if it's not recycled, initialize some attributes
+            imageView = new ImageView(mContext);
+            imageView.setAdjustViewBounds(true);
+//            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+//            imageView.setPadding(0, 0, 0, 0);
+        } else {
+            imageView = (ImageView) convertView;
         }
 
-        // Set values of the views
-        //TextView movTitleView = (TextView) convertView.findViewById(R.id.list_item_title);
-        //movTitleView.setText(movie.title);
-
-        //TextView rDateView = (TextView) convertView.findViewById(R.id.list_item_date);
-        //rDateView.setText(movie.releaseDate);
-
-        // TODO: Set image with Picasso
-        ImageView view = (ImageView) convertView;
-        if (view == null){
-            view = new ImageView(getContext());
-        }
-        String url = getItem(position).poster;
-
-        Picasso.with(getContext()).load("http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg").into(view);//Picasso.with(getContext()).load(url).into(view);
-
-
-
-        //TextView plotSynView = (TextView) convertView.findViewById(R.id.list_item_plot);
-        //plotSynView.setText(movie.plot);
-
-        return convertView;
+//        Picasso.with(mContext).load("http://i.imgur.com/DvpvklR.png").into(imageView);
+        Picasso.with(mContext).load(mThumbIds[position]).into(imageView);
+//        imageView.setImageResource(mThumbIds[position]);
+        return imageView;
     }
+
+    // array with dummy urls
+    private String[] mThumbIds = {
+            "http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg",
+            "http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg",
+            "http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg",
+            "http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg",
+            "http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg",
+            "http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg",
+
+
+//            R.drawable.sample_2, R.drawable.sample_3,
+//            R.drawable.sample_4, R.drawable.sample_5,
+//            R.drawable.sample_6, R.drawable.sample_7,
+//            R.drawable.sample_0, R.drawable.sample_1,
+//            R.drawable.sample_2, R.drawable.sample_3,
+//            R.drawable.sample_4, R.drawable.sample_5,
+//            R.drawable.sample_6, R.drawable.sample_7,
+//            R.drawable.sample_0, R.drawable.sample_1,
+//            R.drawable.sample_2, R.drawable.sample_3,
+//            R.drawable.sample_4, R.drawable.sample_5,
+//            R.drawable.sample_6, R.drawable.sample_7
+    };
 }
-
-
