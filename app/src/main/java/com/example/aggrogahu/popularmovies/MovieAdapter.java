@@ -8,22 +8,27 @@ import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.List;
+
 /**
  * Created by aggrogahu on 7/23/2016.
+ * Concepts from https://developer.android.com/guide/topics/ui/layout/gridview.html
  */
-public class MovieAdapter extends BaseAdapter {
+public class MovieAdapter extends BaseAdapter{
     private Context mContext;
+//    private List<Movie> mMovieList;
 
-    public MovieAdapter(Context c) {
+    public MovieAdapter(Context c, List<Movie> movieList) {
         mContext = c;
+//        mMovieList = movieList;
     }
 
     public int getCount() {
-        return mThumbIds.length;
+        return movies.length;
     }
 
     public Object getItem(int position) {
-        return null;
+        return movies[position];
     }
 
     public long getItemId(int position) {
@@ -44,31 +49,21 @@ public class MovieAdapter extends BaseAdapter {
         }
 
 //        Picasso.with(mContext).load("http://i.imgur.com/DvpvklR.png").into(imageView);
-        Picasso.with(mContext).load(mThumbIds[position]).into(imageView);
+        Picasso.with(mContext).load(movies[position].poster).into(imageView);
 //        imageView.setImageResource(mThumbIds[position]);
         return imageView;
     }
 
-    // array with dummy urls
-    private String[] mThumbIds = {
-            "http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg",
-            "http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg",
-            "http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg",
-            "http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg",
-            "http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg",
-            "http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg",
+    // dummy array
 
-
-//            R.drawable.sample_2, R.drawable.sample_3,
-//            R.drawable.sample_4, R.drawable.sample_5,
-//            R.drawable.sample_6, R.drawable.sample_7,
-//            R.drawable.sample_0, R.drawable.sample_1,
-//            R.drawable.sample_2, R.drawable.sample_3,
-//            R.drawable.sample_4, R.drawable.sample_5,
-//            R.drawable.sample_6, R.drawable.sample_7,
-//            R.drawable.sample_0, R.drawable.sample_1,
-//            R.drawable.sample_2, R.drawable.sample_3,
-//            R.drawable.sample_4, R.drawable.sample_5,
-//            R.drawable.sample_6, R.drawable.sample_7
+    Movie[] movies = {
+            new Movie("Interstellar","July","http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg","plot"),
+            new Movie("Interstellar","July","http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg","plot"),
+            new Movie("Interstellar","July","http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg","plot"),
+            new Movie("Interstellar","July","http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg","plot"),
+            new Movie("Interstellar","July","http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg","plot"),
+            new Movie("Interstellar","July","http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg","plot"),
+            new Movie("Interstellar","July","http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg","plot"),
+            new Movie("Interstellar","July","http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg","plot")
     };
 }
