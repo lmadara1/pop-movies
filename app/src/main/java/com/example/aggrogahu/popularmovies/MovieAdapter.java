@@ -11,24 +11,24 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 /**
- * Created by aggrogahu on 7/23/2016.
+ * Created by aggrogahu on 10/10/2016.
  * Concepts from https://developer.android.com/guide/topics/ui/layout/gridview.html
  */
 public class MovieAdapter extends BaseAdapter{
     private Context mContext;
-//    private List<Movie> mMovieList;
+    private List<Movie> mMovieList;
 
     public MovieAdapter(Context c, List<Movie> movieList) {
         mContext = c;
-//        mMovieList = movieList;
+        mMovieList = movieList;
     }
 
     public int getCount() {
-        return movies.length;
+        return mMovieList.size();
     }
 
     public Object getItem(int position) {
-        return movies[position];
+        return mMovieList.get(position);
     }
 
     public long getItemId(int position) {
@@ -49,21 +49,21 @@ public class MovieAdapter extends BaseAdapter{
         }
 
 //        Picasso.with(mContext).load("http://i.imgur.com/DvpvklR.png").into(imageView);
-        Picasso.with(mContext).load(movies[position].poster).into(imageView);
+        Picasso.with(mContext).load(mMovieList.get(position).poster).into(imageView);
 //        imageView.setImageResource(mThumbIds[position]);
         return imageView;
     }
 
     // dummy array
-
-    Movie[] movies = {
-            new Movie("Interstellar","July","http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg","plot"),
-            new Movie("Interstellar","July","http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg","plot"),
-            new Movie("Interstellar","July","http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg","plot"),
-            new Movie("Interstellar","July","http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg","plot"),
-            new Movie("Interstellar","July","http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg","plot"),
-            new Movie("Interstellar","July","http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg","plot"),
-            new Movie("Interstellar","July","http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg","plot"),
-            new Movie("Interstellar","July","http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg","plot")
-    };
+//
+//    Movie[] movies = {
+//            new Movie("Interstellar","July","http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg","plot"),
+//            new Movie("Interstellar","July","http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg","plot"),
+//            new Movie("Interstellar","July","http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg","plot"),
+//            new Movie("Interstellar","July","http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg","plot"),
+//            new Movie("Interstellar","July","http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg","plot"),
+//            new Movie("Interstellar","July","http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg","plot"),
+//            new Movie("Interstellar","July","http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg","plot"),
+//            new Movie("Interstellar","July","http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg","plot")
+//    };
 }

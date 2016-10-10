@@ -1,5 +1,6 @@
 package com.example.aggrogahu.popularmovies;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
@@ -9,6 +10,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
+
+/**
+ * Created by aggrogahu on 10/10/2016.
+ * Concepts from Sunshine App Udacity Project
+ */
 
 public class MovieDetailActivity extends AppCompatActivity {
 
@@ -21,18 +31,6 @@ public class MovieDetailActivity extends AppCompatActivity {
                     .add(R.id.container, new DetailFragment())
                     .commit();
         }
-//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-//        setSupportActionBar(toolbar);
-//
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
     }
     @Override
@@ -65,8 +63,12 @@ public class MovieDetailActivity extends AppCompatActivity {
 
         private static final String LOG_TAG = DetailFragment.class.getSimpleName();
 
-        private static final String FORECAST_SHARE_HASHTAG = " #SunshineApp";
-        private String mForecastStr;
+        private Movie mMovie;
+        private String mTitle;
+        private String mReleaseDate;
+        private String mPoster;
+        private String mPlot;
+        private Long mVoteAverage;
 
         public DetailFragment() {
             setHasOptionsMenu(true);
@@ -78,46 +80,36 @@ public class MovieDetailActivity extends AppCompatActivity {
 
             View rootView = inflater.inflate(R.layout.fragment_movie_detail, container, false);
 
-//            // The detail Activity called via intent.  Inspect the intent for forecast data.
-//            Intent intent = getActivity().getIntent();
-//            if (intent != null && intent.hasExtra(Intent.EXTRA_TEXT)) {
-//                mForecastStr = intent.getStringExtra(Intent.EXTRA_TEXT);
-//                ((TextView) rootView.findViewById(R.id.detail_string))
-//                        .setText(mForecastStr);
-//            }
+            // The detail Activity called via intent.  Inspect the intent for forecast data.
+            Intent intent = getActivity().getIntent();
+            if (intent != null && intent.hasExtra("Movie")) {
+                mMovie = intent.getExtras().getParcelable("Movie");
+                mTitle = mMovie.title;
+                mReleaseDate = mMovie.releaseDate;
+                mPoster = mMovie.poster;
+                mPlot = mMovie.plot;
+                mVoteAverage = mMovie.voteAverage;
+
+                ((TextView) rootView.findViewById(R.id.movie_title))
+                        .setText(mTitle);
+                ((TextView) rootView.findViewById(R.id.movie_date))
+                        .setText("Released: " + mReleaseDate);
+                ImageView imageView = ((ImageView) rootView.findViewById(R.id.movie_poster));
+                Picasso.with(getContext()).load(mPoster).resize(500,750).into(imageView);
+                ((TextView) rootView.findViewById(R.id.movie_description))
+                        .setText(mPlot);
+                ((TextView) rootView.findViewById(R.id.movie_rating))
+                        .setText("Rated " + mVoteAverage + " out of 10");
+            }
 
             return rootView;
         }
 
         @Override
         public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-            // Inflate the menu; this adds items to the action bar if it is present.
-//            inflater.inflate(R.menu.detail, menu);
 
-//            // Retrieve the share menu item
-//            MenuItem menuItem = menu.findItem(R.id.menu_action_share);
-//
-//            // Get the provider and hold onto it to set/change the share intent.
-//            ShareActionProvider mShareActionProvider =
-//                    (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
-//
-//            // Attach an intent to this ShareActionProvider.  You can update this at any time,
-//            // like when the user selects a new piece of data they might like to share.
-//            if (mShareActionProvider != null ) {
-//                mShareActionProvider.setShareIntent(createShareForecastIntent());
-//            } else {
-//                Log.d(LOG_TAG, "Share Action Provider is null?");
-//            }
         }
 
-//        private Intent createShareForecastIntent() {
-//            Intent shareIntent = new Intent(Intent.ACTION_SEND);
-//            shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-//            shareIntent.setType("text/plain");
-//            shareIntent.putExtra(Intent.EXTRA_TEXT,
-//                    mForecastStr + FORECAST_SHARE_HASHTAG);
-//            return shareIntent;
-//        }
     }
 
 }

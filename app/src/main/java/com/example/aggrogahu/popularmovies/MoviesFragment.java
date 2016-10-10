@@ -7,10 +7,14 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,31 +26,29 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
+/**
+ * Created by aggrogahu on 10/10/2016.
+ * Concepts from Sunshine App Udacity Project
+ */
 
 public class MoviesFragment extends Fragment {
 
     private final String LOG_TAG = MoviesFragment.class.getSimpleName();
 
     private MovieAdapter mMovieAdapter;
+    private ArrayList<Movie> movieArrayList;    //List that adapter will read data from
+    private boolean apicall = false;            //Flag to indicate if api call succeeded or not
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    private void updateMovies(){
+    private void updateMovies(String sort){
         FetchMoviesTask moviesTask = new FetchMoviesTask();
-        moviesTask.execute("herp","derp");
+        moviesTask.execute(sort);
     }
 
     public void onStart(){
         super.onStart();
-        updateMovies();
+        updateMovies("popular");
     }
 
     public MoviesFragment() {
@@ -56,10 +58,28 @@ public class MoviesFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+        setHasOptionsMenu(true);
+        movieArrayList = new ArrayList<Movie>();
+    }
+
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater){
+        inflater.inflate(R.menu.moviefragment,menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        int id = item.getItemId();
+        if (id == R.id.action_popular_sort){
+            updateMovies("popular");
+            Log.v(LOG_TAG,"popular");
+            return true;
         }
+        if (id == R.id.action_rating_sort){
+            updateMovies("top_rated");
+            Log.v(LOG_TAG,"rop_tated");
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -68,26 +88,13 @@ public class MoviesFragment extends Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        // TODO: Initialize adapter
-//        mMovieAdapter = new MovieAdapter(getContext());//(getActivity(),R.layout.grid_item_movie,R.id.grid_item_movie_imageview,new ArrayList<ImageView>());
-
         // Find Grid View
         GridView myGridView = (GridView) rootView.findViewById(R.id.gridview_movies);
 
-        // TODO: Setup adapter
-        mMovieAdapter = new MovieAdapter(getActivity());
+        // Setup adapter
+        mMovieAdapter = new MovieAdapter(getActivity(),movieArrayList);
         myGridView.setAdapter(mMovieAdapter);
 
-        // Dummy data to test
-//        ImageView iv = new ImageView(getContext());
-//        iv.setImageResource(R.drawable.interstellar);
-//        mMovieAdapter.add(iv);
-
-        // Picasso test
-//        ImageView iv = new ImageView(getActivity());
-//        Picasso.with(getActivity()).load("http://i.imgur.com/DvpvklR.png").into(iv);
-//        mMovieAdapter.add(iv);
-//        Log.v("Adapter Count", "Count" + mMovieAdapter.getCount());
         mMovieAdapter.notifyDataSetChanged();
 
         // Launch Movie Details
@@ -95,22 +102,20 @@ public class MoviesFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 //Toast.makeText(getActivity(),mForecastAdapter.getItem(i).toString(), Toast.LENGTH_SHORT).show();
-                String forecast = mMovieAdapter.getItem(i).toString();
+                Movie movie = (Movie) mMovieAdapter.getItem(i);
                 Intent detailIntent = new Intent(getActivity(),MovieDetailActivity.class)
-                        .putExtra(Intent.EXTRA_TEXT,5);//forecast went where 5 is
+                        .putExtra("Movie",movie);
                 startActivity(detailIntent);
             }
         });
-
-
-
-        // TODO: create intent and launch movie details page
-        //return inflater.inflate(R.layout.movie_detail, container, false);
         return rootView;
     }
 
     public class FetchMoviesTask extends AsyncTask<String,Void,Movie[]>{
-        private Movie[] getMovieDataFromJson(String movieJsonStr)
+
+        private String sort;
+
+        private Movie[] getMovieDataFromJson(String movieJsonStr, String sort)
                 throws JSONException{
 
             final String TMDB_RESULTS = "results";
@@ -118,6 +123,7 @@ public class MoviesFragment extends Fragment {
             final String TMDB_DATE = "release_date";
             final String TMDB_POSTER = "poster_path";
             final String TMDB_PLOT = "overview";
+            final String TMDB_VOTEAV = "vote_average";
             int numMovs;
 
             JSONObject moviesJson = new JSONObject(movieJsonStr);
@@ -131,6 +137,7 @@ public class MoviesFragment extends Fragment {
                 String releaseDate;
                 String poster;
                 String plot;
+                Long voteAverage;
                 String baseURL = "http://image.tmdb.org/t/p/w185";
 
                 // Get the JSON object representing the movie
@@ -140,10 +147,11 @@ public class MoviesFragment extends Fragment {
                 releaseDate = movieInfo.getString(TMDB_DATE);
                 poster = baseURL + movieInfo.getString(TMDB_POSTER);
                 plot = movieInfo.getString(TMDB_PLOT);
+                voteAverage = movieInfo.getLong(TMDB_VOTEAV);
 
                 // Debug to make sure we're getting the right information from the JSON
                 // Log.v(LOG_TAG, title + releaseDate + poster + plot);
-                resultMovs[i] = new Movie(title,releaseDate,poster,plot);
+                resultMovs[i] = new Movie(title,releaseDate,poster,plot,voteAverage);
             }
 
             return resultMovs;
@@ -161,25 +169,26 @@ public class MoviesFragment extends Fragment {
             String moviesJsonStr = null;
 
             // URL parameters to create API call.
+            String apikey = "your_themoviedb_api_key_here"; // Since sharing API keys publicly on github is frowned upon, I have removed the api key, insert your own here to ensure app works
             String format = "json";
-            String sort = "popular";//either "popular" or "top_rated"
+            this.sort = params[0];
+            Log.v("Sorting: ", sort);
+//            String sort = sort;//either "popular" or "top_rated"
 
             try {
-                // Construct the URL for the OpenWeatherMap query
-                // Possible parameters are avaiable at OWM's forecast API page, at
-                // http://openweathermap.org/API#forecast
+                // Construct the URL for the API query
                 Uri.Builder builder = new Uri.Builder();
                 builder.scheme("http")
                         .authority("api.themoviedb.org")
                         .appendPath("3")
                         .appendPath("movie")
                         .appendPath(sort)
-                        .appendQueryParameter("api_key","900d602e0797810c4581d1a74e5d030c")
+                        .appendQueryParameter("api_key",apikey)
                 ;
                 //Log.d("Moviez", builder.build().toString());
                 URL url = new URL(builder.build().toString());
 
-                // Create the request to OpenWeatherMap, and open the connection
+                // Create the request and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 urlConnection.connect();
@@ -208,6 +217,7 @@ public class MoviesFragment extends Fragment {
                 moviesJsonStr = buffer.toString();
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
+                apicall = true;
                 // If the code didn't successfully get the weather data, there's no point in attemping
                 // to parse it.
                 return null;
@@ -226,8 +236,7 @@ public class MoviesFragment extends Fragment {
             //Debug to make sure the api call worked correctly, should return json with desired information
             //Log.v(LOG_TAG, moviesJsonStr);
             try {
-                //Log.v("Array [0]", getWeatherDataFromJson(forecastJsonStr,days)[0]);
-                return getMovieDataFromJson(moviesJsonStr);
+                return getMovieDataFromJson(moviesJsonStr,sort);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -237,7 +246,16 @@ public class MoviesFragment extends Fragment {
         @Override
         protected void onPostExecute(Movie[] movies){
             //TODO update adapter
-//            mMovieAdapter
+            if (apicall){
+                Toast.makeText(getActivity(),"API call failed, please insert your own API key, see README for details",Toast.LENGTH_SHORT).show();
+            }
+            movieArrayList.clear();
+            if(movies != null){
+            for (Movie m : movies){
+                movieArrayList.add(m);
+            }
+            }
+            mMovieAdapter.notifyDataSetChanged();
         }
     }
 }
