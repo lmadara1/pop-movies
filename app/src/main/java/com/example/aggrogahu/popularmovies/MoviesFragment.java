@@ -169,7 +169,7 @@ public class MoviesFragment extends Fragment {
             String moviesJsonStr = null;
 
             // URL parameters to create API call.
-            String apikey = "your_themoviedb_api_key_here"; // Since sharing API keys publicly on github is frowned upon, I have removed the api key, insert your own here to ensure app works
+            String apikey = ""; // Since sharing API keys publicly on github is frowned upon, I have removed the api key, insert your own here to ensure app works
             String format = "json";
             this.sort = params[0];
             Log.v("Sorting: ", sort);
