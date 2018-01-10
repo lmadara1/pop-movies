@@ -13,13 +13,15 @@ public class Movie implements Parcelable {
     String releaseDate;
     String poster;
     String plot;
+    int mID;
     Long voteAverage;
 
-    public Movie(String tit, String rDate, String postr, String plot, Long voteAv){
+    public Movie(String tit, String rDate, String postr, String plot, int id, Long voteAv){
         this.title = tit;
         this.releaseDate = rDate;
         this.poster = postr;
         this.plot = plot;
+        this.mID = id;
         this.voteAverage = voteAv;
     }
 
@@ -28,6 +30,7 @@ public class Movie implements Parcelable {
         releaseDate = in.readString();
         poster = in.readString();
         plot = in.readString();
+        mID = in.readInt();
         voteAverage = in.readLong();
     }
 
@@ -43,6 +46,7 @@ public class Movie implements Parcelable {
         parcel.writeString(releaseDate);
         parcel.writeString(poster);
         parcel.writeString(plot);
+        parcel.writeInt(mID);
         parcel.writeLong(voteAverage);
     }
 

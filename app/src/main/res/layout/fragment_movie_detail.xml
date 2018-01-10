@@ -57,20 +57,26 @@
                     android:id="@+id/movie_rating"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/rating" />
+                    tools:text="@string/rating" />
 
                 <TextView
                     android:id="@+id/movie_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/date" />
+                    tools:text="@string/date" />
+
+                <TextView
+                    android:id="@+id/movie_id"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:text="ID" />
             </LinearLayout>
         </TableRow>
 
         <TextView
             android:id="@+id/movie_description"
             android:padding="5dp"
-            android:text="@string/movie_description" />
+            tools:text="@string/movie_description" />
 
     </TableLayout>
 

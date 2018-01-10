@@ -12,6 +12,6 @@
     <string name="movie_details">Movie Details</string>
     <string name="rating">Rating</string>
     <string name="date">Date</string>
-    <string name="movie_description">Movie Description</string>
+    <string name="movie_description">In a part of the world where there are no rules, deep in the jungle where nothing that lives is safe, an elite rescue squad is being led by the ultimate warrior...</string>
     <string name="imageview_content_description">thumbnail of movie poster</string>
 </resources>

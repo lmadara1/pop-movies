@@ -4,7 +4,6 @@
     <modules>
       <module fileurl="file://D:\udacity\pop-movies\PopularMovies.iml" filepath="D:\udacity\pop-movies\PopularMovies.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://D:\udacity\pop-movies\app\app.iml" filepath="D:\udacity\pop-movies\app\app.iml" />
       <module fileurl="file://$PROJECT_DIR$/pop-movies.iml" filepath="$PROJECT_DIR$/pop-movies.iml" />
     </modules>
   </component>
