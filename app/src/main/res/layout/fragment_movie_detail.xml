@@ -1,14 +1,21 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.aggrogahu.popularmovies.MovieDetailActivity">
-
-    <TableLayout
+    <android.support.constraint.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/white"
-        android:orientation="vertical">
+        android:layout_height="wrap_content">
+        <android.support.constraint.Guideline
+            android:id="@+id/horizontal_middle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.5"/>
+
 
         <TextView
             android:id="@+id/movie_title"
@@ -21,64 +28,72 @@
             android:paddingLeft="30dp"
             android:paddingRight="30dp"
             android:paddingTop="40dp"
-            android:text="@string/movie_details"
+            tools:text="@string/movie_title"
             android:textColor="@color/white"
             android:textSize="35sp" />
 
-        <TableRow
-            android:layout_width="0dp"
+
+        <ImageView
+            android:id="@+id/movie_poster"
+            android:layout_width="wrap_content"
+            android:layout_height="240dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="8dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/imageview_content_description"
+            android:src="@drawable/interstellar"
+            app:layout_constraintEnd_toStartOf="@+id/horizontal_middle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/movie_title" />
+
+
+        <TextView
+            android:id="@+id/movie_rating"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingBottom="15dp"
-            android:paddingTop="15dp">
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toStartOf="@+id/movie_date"
+            app:layout_constraintTop_toBottomOf="@+id/movie_date"
+            tools:text="@string/rating" />
 
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
+        <TextView
+            android:id="@+id/movie_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toStartOf="@+id/horizontal_middle"
+            app:layout_constraintTop_toTopOf="@+id/movie_poster"
+            tools:text="@string/date" />
 
-                <ImageView
-                    android:id="@+id/movie_poster"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:adjustViewBounds="true"
-                    android:contentDescription="@string/imageview_content_description"
-                    android:src="@drawable/interstellar" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:padding="5dp">
-
-                <TextView
-                    android:id="@+id/movie_rating"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    tools:text="@string/rating" />
-
-                <TextView
-                    android:id="@+id/movie_date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    tools:text="@string/date" />
-
-                <TextView
-                    android:id="@+id/movie_id"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    tools:text="ID" />
-            </LinearLayout>
-        </TableRow>
+        <TextView
+            android:id="@+id/movie_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toStartOf="@+id/movie_rating"
+            app:layout_constraintTop_toBottomOf="@+id/movie_rating"
+            tools:text="ID" />
 
         <TextView
             android:id="@+id/movie_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
             android:padding="5dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/movie_poster"
             tools:text="@string/movie_description" />
+        <LinearLayout
+            android:id="@+id/trailer_list"
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+        </LinearLayout>
 
-    </TableLayout>
 
-
+    </android.support.constraint.ConstraintLayout>
 </ScrollView>
