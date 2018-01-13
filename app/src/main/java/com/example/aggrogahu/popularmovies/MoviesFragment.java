@@ -47,6 +47,7 @@ public class MoviesFragment extends Fragment {
         moviesTask.execute(sort);
     }
 
+//    TODO (5) make sure sorting preference persists after opening details and navigating back, as well as through rotating device
     public void onStart(){
         super.onStart();
         updateMovies("popular");
@@ -111,7 +112,7 @@ public class MoviesFragment extends Fragment {
         });
         return rootView;
     }
-//  TODO (5) prolly should factor the FetchMoviesTask and AsyncTask to separate java file too
+//  TODO (8) prolly should factor the FetchMoviesTask and AsyncTask to separate java file too
     public class FetchMoviesTask extends AsyncTask<String,Void,Movie[]>{
 
         private String sort;
@@ -249,7 +250,7 @@ public class MoviesFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Movie[] movies){
-            //TODO update adapter
+            //TODO (?) update adapter
             if (apicall){
                 Toast.makeText(getActivity(),"API call failed, please insert your own API key, see README for details",Toast.LENGTH_SHORT).show();
             }

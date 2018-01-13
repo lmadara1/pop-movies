@@ -4,6 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.aggrogahu.popularmovies.MovieDetailActivity">
+    <!--TODO (3) have trailer ListView expand height ie. what I think wrap_content should be doing -->
+    <!--TODO (3) add favorites button-->
     <android.support.constraint.ConstraintLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="vertical"
@@ -38,7 +40,7 @@
             android:layout_width="wrap_content"
             android:layout_height="240dp"
             android:layout_gravity="center"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             android:adjustViewBounds="true"
             android:contentDescription="@string/imageview_content_description"
             android:src="@drawable/interstellar"
@@ -77,22 +79,28 @@
 
         <TextView
             android:id="@+id/movie_description"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:padding="5dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/movie_poster"
             tools:text="@string/movie_description" />
-        <LinearLayout
-            android:id="@+id/trailer_list"
-            android:orientation="vertical"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-        </LinearLayout>
+
+        <include
+            android:id="@+id/trailers"
+            layout="@layout/trailers"
+            android:layout_width="0dp"
+            android:layout_height="240dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/movie_description" />
 
 
     </android.support.constraint.ConstraintLayout>

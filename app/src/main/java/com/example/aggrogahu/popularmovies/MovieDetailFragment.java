@@ -1,5 +1,6 @@
 package com.example.aggrogahu.popularmovies;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -11,7 +12,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -26,10 +29,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
 /**
  * Fragment for movie details
  */
+//TODO (3) movie reviews
 //    COMPLETED factor fragment out into separate java file
 public class MovieDetailFragment extends Fragment {
 
@@ -43,15 +48,48 @@ public class MovieDetailFragment extends Fragment {
     private int movID;
     private Long mVoteAverage;
 
+    private TrailerAdapter mTrailerAdapter;
+    private ArrayList<Trailer> trailerArrayList;
+
     public MovieDetailFragment() {
-        setHasOptionsMenu(true);
+//        setHasOptionsMenu(true);
     }
 
+    private void fetchTrailersReviews(){
+        FetchTrailerTask trailerTask = new FetchTrailerTask();
+        trailerTask.execute();
+
+    }
+
+    public void onStart() {
+        super.onStart();
+        fetchTrailersReviews();
+    }
+
+
+
+    @Override
+    public void onCreate(Bundle savedInstanceState){
+        super.onCreate(savedInstanceState);
+        trailerArrayList = new ArrayList<Trailer>();
+    }
+
+
+
+    //    TODO (8) use Data Binding to clean up findViewById calls
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        // Inflate the layout for the movie detail fragment
         View rootView = inflater.inflate(R.layout.fragment_movie_detail, container, false);
+
+        // Find list view
+        ListView myListView = rootView.findViewById(R.id.trailer_list);
+
+        // Setup adapter
+        mTrailerAdapter = new TrailerAdapter(getActivity(),trailerArrayList);
+        myListView.setAdapter(mTrailerAdapter);
 
         // The detail Activity called via intent.  Inspect the intent for movie data.
         Intent intent = getActivity().getIntent();
@@ -75,19 +113,40 @@ public class MovieDetailFragment extends Fragment {
             ((TextView) rootView.findViewById(R.id.movie_id))
                     .setText("ID: " + movID);
             ((TextView) rootView.findViewById(R.id.movie_rating))
-                    .setText("Rated " + mVoteAverage + " out of 10");
+                    .setText(mVoteAverage + "/10");
         }
+
+        // Launch Youtube app via intent
+        myListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                              @Override
+                                              public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                                                  Trailer trailer = (Trailer) mTrailerAdapter.getItem(i);
+                                                  String key = trailer.youTubeKey;
+                                                  Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + key));
+                                                  Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.youtube.com/watch?v=" + key));
+
+                                                  try {
+                                                      getActivity().startActivity(appIntent);
+                                                  } catch (ActivityNotFoundException e) {
+                                                      getActivity().startActivity(browserIntent);
+                                                  }
+                                              }
+                                          }
+
+
+        );
 
         return rootView;
     }
 
+//    TODO (8) do something with settings for Movie Detail screen
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 
     }
-    public class FetchTrailerTask extends AsyncTask<Void,Void,String[]> {
+    public class FetchTrailerTask extends AsyncTask<Void,Void,Trailer[]> {
 
-        private String[] getTrailersFromJson(String trailerJsonString)
+        private Trailer[] getTrailersFromJson(String trailerJsonString)
                 throws JSONException {
 
             final String TMDB_RESULTS = "results";
@@ -98,7 +157,7 @@ public class MovieDetailFragment extends Fragment {
             JSONArray trailersJsonJSONArray = trailersJson.getJSONArray(TMDB_RESULTS);
             numMovs = trailersJsonJSONArray.length();
 
-            String[] resultTrailers = new String[numMovs];
+            Trailer[] resultTrailers = new Trailer[numMovs];
 
             for(int i = 0; i < trailersJsonJSONArray.length(); i++){
 
@@ -108,15 +167,17 @@ public class MovieDetailFragment extends Fragment {
                 // Debug to make sure we're getting the right information from the JSON
                 // Log.v(LOG_TAG, title + releaseDate + poster + plot);
 
-                // Get the trailers from JSON object into String Array
-                resultTrailers[i] = movieInfo.getString("key");
+                // Get the trailer name and key from JSON object
+                String key = movieInfo.getString("key");
+                String title = movieInfo.getString("name");
+                resultTrailers[i] = new Trailer(title,key);
             }
 
             return resultTrailers;
         }
 
         @Override
-        protected String[] doInBackground(Void... voids) {
+        protected Trailer[] doInBackground(Void... voids) {
             // These two need to be declared outside the try/catch
             // so that they can be closed in the finally block.
             HttpURLConnection urlConnection = null;
@@ -199,6 +260,17 @@ public class MovieDetailFragment extends Fragment {
                 e.printStackTrace();
             }
             return null;
+        }
+
+//        COMPLETED (3) onPostExecute should update the ListView via notifying adapter
+        @Override
+        protected void onPostExecute(Trailer[] trailers) {
+            super.onPostExecute(trailers);
+//            fetchTrailersReviews();
+            for (Trailer t: trailers){
+                trailerArrayList.add(t);
+            }
+            mTrailerAdapter.notifyDataSetChanged();
         }
     }
 }
