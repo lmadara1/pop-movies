@@ -1,17 +1,17 @@
 <resources>
     <string name="app_name">Popular Movies</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!--<string name="hello_blank_fragment">Hello blank fragment</string>-->
     <string name="Settings">Settings</string>
     <string name="sort_by_popularity">Sort by popularity</string>
     <string name="sort_by_rating">Sort by rating</string>
     <string name="detail">detail</string>
     <string name="title_activity_movie_detail">Movie Details</string>
     <string name="action_settings">Settings</string>
-    <string name="movie_details">Movie Details</string>
+    <string name="movie_title">Movie Title</string>
     <string name="rating">Rating</string>
     <string name="date">Date</string>
-    <string name="movie_description">Movie Description</string>
+    <string name="movie_description">In a part of the world where there are no rules, deep in the jungle where nothing that lives is safe, an elite rescue squad is being led by the ultimate warrior...</string>
     <string name="imageview_content_description">thumbnail of movie poster</string>
+    <string name="trailers_label">Trailers: </string>
 </resources>

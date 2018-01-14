@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Debug;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -46,6 +47,7 @@ public class MoviesFragment extends Fragment {
         moviesTask.execute(sort);
     }
 
+//    TODO (5) make sure sorting preference persists after opening details and navigating back, as well as through rotating device
     public void onStart(){
         super.onStart();
         updateMovies("popular");
@@ -89,7 +91,7 @@ public class MoviesFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         // Find Grid View
-        GridView myGridView = (GridView) rootView.findViewById(R.id.gridview_movies);
+        GridView myGridView = rootView.findViewById(R.id.gridview_movies);
 
         // Setup adapter
         mMovieAdapter = new MovieAdapter(getActivity(),movieArrayList);
@@ -110,7 +112,7 @@ public class MoviesFragment extends Fragment {
         });
         return rootView;
     }
-
+//  TODO (8) prolly should factor the FetchMoviesTask and AsyncTask to separate java file too
     public class FetchMoviesTask extends AsyncTask<String,Void,Movie[]>{
 
         private String sort;
@@ -123,6 +125,7 @@ public class MoviesFragment extends Fragment {
             final String TMDB_DATE = "release_date";
             final String TMDB_POSTER = "poster_path";
             final String TMDB_PLOT = "overview";
+            final String TMDB_ID = "id";
             final String TMDB_VOTEAV = "vote_average";
             int numMovs;
 
@@ -137,6 +140,7 @@ public class MoviesFragment extends Fragment {
                 String releaseDate;
                 String poster;
                 String plot;
+                int mid;
                 Long voteAverage;
                 String baseURL = "http://image.tmdb.org/t/p/w185";
 
@@ -147,11 +151,12 @@ public class MoviesFragment extends Fragment {
                 releaseDate = movieInfo.getString(TMDB_DATE);
                 poster = baseURL + movieInfo.getString(TMDB_POSTER);
                 plot = movieInfo.getString(TMDB_PLOT);
+                mid = movieInfo.getInt(TMDB_ID);
                 voteAverage = movieInfo.getLong(TMDB_VOTEAV);
 
                 // Debug to make sure we're getting the right information from the JSON
                 // Log.v(LOG_TAG, title + releaseDate + poster + plot);
-                resultMovs[i] = new Movie(title,releaseDate,poster,plot,voteAverage);
+                resultMovs[i] = new Movie(title,releaseDate,poster,plot,mid,voteAverage);
             }
 
             return resultMovs;
@@ -166,10 +171,10 @@ public class MoviesFragment extends Fragment {
             BufferedReader reader = null;
 
             // Will contain the raw JSON response as a string.
-            String moviesJsonStr = null;
+            String moviesJsonStr;
 
             // URL parameters to create API call.
-            String apikey = "your_themoviedb_api_key_here"; // Since sharing API keys publicly on github is frowned upon, I have removed the api key, insert your own here to ensure app works
+            String apikey = ""; // Since sharing API keys publicly on github is frowned upon, I have removed the api key, insert your own here to ensure app works
             String format = "json";
             this.sort = params[0];
             Log.v("Sorting: ", sort);
@@ -185,7 +190,7 @@ public class MoviesFragment extends Fragment {
                         .appendPath(sort)
                         .appendQueryParameter("api_key",apikey)
                 ;
-                //Log.d("Moviez", builder.build().toString());
+                Log.d("Moviez", builder.build().toString());
                 URL url = new URL(builder.build().toString());
 
                 // Create the request and open the connection
@@ -218,7 +223,7 @@ public class MoviesFragment extends Fragment {
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
                 apicall = true;
-                // If the code didn't successfully get the weather data, there's no point in attemping
+                // If the code didn't successfully get the data, there's no point in attemping
                 // to parse it.
                 return null;
             } finally{
@@ -245,7 +250,7 @@ public class MoviesFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Movie[] movies){
-            //TODO update adapter
+            //TODO (?) update adapter
             if (apicall){
                 Toast.makeText(getActivity(),"API call failed, please insert your own API key, see README for details",Toast.LENGTH_SHORT).show();
             }
