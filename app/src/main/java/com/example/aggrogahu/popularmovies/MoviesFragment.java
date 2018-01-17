@@ -250,7 +250,7 @@ public class MoviesFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Movie[] movies){
-            //TODO (?) update adapter
+            //TODO (8) update adapter error message
             if (apicall){
                 Toast.makeText(getActivity(),"API call failed, please insert your own API key, see README for details",Toast.LENGTH_SHORT).show();
             }
