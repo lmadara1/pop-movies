@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="@dimen/review_padding_vertical"
+    android:paddingBottom="@dimen/review_padding_vertical"
+    android:paddingRight="@dimen/trailer_padding_horizontal"
+    android:paddingLeft="@dimen/trailer_padding_horizontal">
+
+    <TextView
+        android:id="@+id/review_author"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="My Momma says:"
+        android:layout_marginLeft="8dp" />
+
+    <TextView
+        android:id="@+id/review"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:maxLines="3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/review_author"
+        tools:text="In the year 2007 A.D., a fire was brewing in the Kyoto Animation studio. Fresh off the success of Haruhi Suzumiya and smelling of farts and ramen-scented body odor, the staff of KyoAni developed an ingenious plan to further milk countless wads of cashmoney from pathetic losers and pedophiles on both sides of the pacific: take a popular 4 panel comic series ripe with the elements that made Suzumiya a financial success (pandering to shut in weeaboos with lolicon action figure collections and terabytes of hentai) and turn it into an equally horrendous anime series." />
+
+    <TextView
+        android:id="@+id/read_more"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/read_more"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/review"
+        android:layout_marginLeft="8dp"
+        android:textColor="@color/colorPrimary"
+        android:paddingBottom="8dp"/>
+
+</android.support.constraint.ConstraintLayout>

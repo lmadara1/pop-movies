@@ -47,7 +47,7 @@ public class TrailerAdapter extends BaseAdapter{
     public View getView(int i, View view, ViewGroup viewGroup) {
 
         if (view == null){
-            view = LayoutInflater.from(tContext).inflate(R.layout.list_item_trailer,viewGroup,false);//TODO (3) needs false?
+            view = LayoutInflater.from(tContext).inflate(R.layout.list_item_trailer,viewGroup,false);
         }
 
         TextView trailerName = view.findViewById(R.id.trailer_title);

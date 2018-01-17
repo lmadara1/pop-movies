@@ -14,4 +14,7 @@
     <string name="movie_description">In a part of the world where there are no rules, deep in the jungle where nothing that lives is safe, an elite rescue squad is being led by the ultimate warrior...</string>
     <string name="imageview_content_description">thumbnail of movie poster</string>
     <string name="trailers_label">Trailers: </string>
+    <string name="reviews_label">Reviews:</string>
+    <string name="read_more">READ MORE</string>
+    <string name="save_as_favorite">Save as Favorite</string>
 </resources>
