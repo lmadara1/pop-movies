@@ -1,9 +1,12 @@
 package com.example.aggrogahu.popularmovies;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import com.facebook.stetho.Stetho;
 
 /**
  * Created by aggrogahu on 10/10/2016.
@@ -29,6 +32,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.detail, menu);
         return true;
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

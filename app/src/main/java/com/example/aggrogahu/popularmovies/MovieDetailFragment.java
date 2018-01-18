@@ -1,6 +1,7 @@
 package com.example.aggrogahu.popularmovies;
 
 import android.content.ActivityNotFoundException;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -13,13 +14,17 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
-import android.widget.ListView;
+//import android.widget.ListAdapter;
+//import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
+import com.example.aggrogahu.popularmovies.data.MovieDbContract;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -37,7 +42,7 @@ import java.util.ArrayList;
 /**
  * Fragment for movie details
  */
-//    TODO (3) Create Content Provider
+//    COMPLETED (3) Create Content Provider
 //COMPLETED (3) movie reviews
 //    COMPLETED factor fragment out into separate java file
 public class MovieDetailFragment extends Fragment {
@@ -59,6 +64,26 @@ public class MovieDetailFragment extends Fragment {
 
     public MovieDetailFragment() {
 //        setHasOptionsMenu(true);
+    }
+
+    public void addFav(){
+        // create contentValues with movID
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MovieDbContract.MovieEntry.COLUMN_MOVIE_ID, movID);
+        // Insert the via ContentResolver
+        Uri uri = getActivity().getContentResolver().insert(MovieDbContract.MovieEntry.CONTENT_URI, contentValues);
+
+        if(uri != null) {
+//            Toast.makeText(getActivity(), uri.toString(), Toast.LENGTH_LONG).show();
+            Log.d("add Fav", "uri: " + uri);
+        }
+    }
+
+    public void deleteFav(){
+        String movieId = Integer.toString(movID);
+        Uri uri = MovieDbContract.MovieEntry.CONTENT_URI.buildUpon().appendPath(movieId).build();
+        Log.d("delete fav", "uri: " + uri);
+        getActivity().getContentResolver().delete(uri, null, null);
     }
 
     private void fetchTrailersReviews(){
@@ -162,10 +187,6 @@ public class MovieDetailFragment extends Fragment {
 //        mTrailerAdapter = new TrailerAdapter(getActivity(),trailerArrayList);
 //        myListView.setAdapter(mTrailerAdapter);
 
-
-
-
-
         // The detail Activity called via intent.  Inspect the intent for movie data.
         Intent intent = getActivity().getIntent();
         if (intent != null && intent.hasExtra("Movie")) {
@@ -190,6 +211,21 @@ public class MovieDetailFragment extends Fragment {
             ((TextView) rootView.findViewById(R.id.movie_rating))
                     .setText(mVoteAverage + "/10");
         }
+
+        // Setup add favorite button
+        ToggleButton favButton = rootView.findViewById(R.id.favoriteButton);
+        favButton.setChecked(true);
+        favButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if(b){
+                    addFav();
+                } else {
+                    deleteFav();
+                }
+            }
+        });
+
 
         // Launch Youtube app via intent
 //        myLinearList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -219,6 +255,8 @@ public class MovieDetailFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 
     }
+
+
     public class FetchTrailerTask extends AsyncTask<Void,Void,Trailer[]> {
 
         private Trailer[] getTrailersFromJson(String trailerJsonString)
@@ -342,6 +380,7 @@ public class MovieDetailFragment extends Fragment {
         @Override
         protected void onPostExecute(Trailer[] trailers) {
             super.onPostExecute(trailers);
+            trailerLinearList.removeAllViews();
             // limit to 5
             int tSize;
             if (trailers.length > 5){
@@ -484,6 +523,7 @@ public class MovieDetailFragment extends Fragment {
         protected void onPostExecute(Review[] reviews) {
             super.onPostExecute(reviews);
             //limit to 5
+            reviewLinearList.removeAllViews();
             int rSize;
             if (reviews.length > 5){
                 rSize = 5;

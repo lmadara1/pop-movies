@@ -1,9 +1,12 @@
 package com.example.aggrogahu.popularmovies;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import com.facebook.stetho.Stetho;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -16,6 +19,11 @@ public class MainActivity extends AppCompatActivity {
                     .add(R.id.main_container, new MoviesFragment())
                     .commit();
         }
+        final Context context = this;
+        Stetho.initialize(
+                Stetho.newInitializerBuilder(context)
+                        .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(context))
+                        .build());
     }
 
     @Override

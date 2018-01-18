@@ -17,4 +17,5 @@
     <string name="reviews_label">Reviews:</string>
     <string name="read_more">READ MORE</string>
     <string name="save_as_favorite">Save as Favorite</string>
+    <string name="unmark_as_favorite">Unmark as Favorite</string>
 </resources>

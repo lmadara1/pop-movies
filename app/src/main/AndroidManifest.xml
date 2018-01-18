@@ -25,6 +25,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.aggrogahu.popularmovies.MainActivity" />
         </activity>
+        <provider
+            android:authorities="com.example.aggrogahu.popularmovies"
+            android:name="com.example.aggrogahu.popularmovies.data.MovieContentProvider"
+            android:exported="false"/>
     </application>
 
 </manifest>
