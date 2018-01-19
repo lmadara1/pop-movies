@@ -65,14 +65,6 @@ public class MovieContentProvider extends ContentProvider {
         switch (match) {
             // query for entire movie directory
             case MOVIES:
-                cursor = db.query(TABLE_NAME,
-                        projection,
-                        s,
-                        strings1,
-                        null,
-                        null,
-                        sortOrder);
-                break;
             case MOVIES_WITH_ID:
                 cursor = db.query(TABLE_NAME,
                         projection,

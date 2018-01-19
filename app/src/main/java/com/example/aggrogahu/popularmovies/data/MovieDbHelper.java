@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.example.aggrogahu.popularmovies.Movie;
 import com.example.aggrogahu.popularmovies.data.MovieDbContract.MovieEntry;
 
 /**
@@ -30,7 +31,12 @@ public class MovieDbHelper extends SQLiteOpenHelper {
         //Create movies table
         final String CREATE_TABLE = "CREATE TABLE " + MovieEntry.TABLE_NAME + " (" +
                         MovieEntry._ID             + " INTEGER PRIMARY KEY, " +
-                        MovieEntry.COLUMN_MOVIE_ID + " INTEGER NOT NULL);";
+                        MovieEntry.COLUMN_MOVIE_ID + " INTEGER NOT NULL, " +
+                        MovieEntry.COLUMN_MOVIE_TITLE + " TEXT NOT NULL, " +
+                        MovieEntry.COLUMN_MOVIE_DATE + " TEXT NOT NULL, " +
+                        MovieEntry.COLUMN_MOVIE_POSTER + " TEXT NOT NULL, " +
+                        MovieEntry.COLUMN_MOVIE_PLOT + " TEXT NOT NULL, " +
+                        MovieEntry.COLUMN_MOVIE_VOTE + " INTEGER NOT NULL);";
 
 
         sqLiteDatabase.execSQL(CREATE_TABLE);

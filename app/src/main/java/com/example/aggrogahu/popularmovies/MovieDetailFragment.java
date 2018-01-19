@@ -3,6 +3,8 @@ package com.example.aggrogahu.popularmovies;
 import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -55,7 +57,7 @@ public class MovieDetailFragment extends Fragment {
     private String mPoster;
     private String mPlot;
     private int movID;
-    private Long mVoteAverage;
+    private int mVoteAverage;
 
 //    private TrailerAdapter mTrailerAdapter;
     private LinearLayout trailerLinearList;
@@ -70,6 +72,12 @@ public class MovieDetailFragment extends Fragment {
         // create contentValues with movID
         ContentValues contentValues = new ContentValues();
         contentValues.put(MovieDbContract.MovieEntry.COLUMN_MOVIE_ID, movID);
+        contentValues.put(MovieDbContract.MovieEntry.COLUMN_MOVIE_TITLE, mTitle);
+        contentValues.put(MovieDbContract.MovieEntry.COLUMN_MOVIE_DATE, mReleaseDate);
+        contentValues.put(MovieDbContract.MovieEntry.COLUMN_MOVIE_POSTER, mPoster);
+        contentValues.put(MovieDbContract.MovieEntry.COLUMN_MOVIE_PLOT, mPlot);
+        contentValues.put(MovieDbContract.MovieEntry.COLUMN_MOVIE_VOTE, mVoteAverage);
+
         // Insert the via ContentResolver
         Uri uri = getActivity().getContentResolver().insert(MovieDbContract.MovieEntry.CONTENT_URI, contentValues);
 
@@ -214,7 +222,21 @@ public class MovieDetailFragment extends Fragment {
 
         // Setup add favorite button
         ToggleButton favButton = rootView.findViewById(R.id.favoriteButton);
-        favButton.setChecked(true);
+
+        // Check to see if the movie is already saved as a favorite
+        String movieId = Integer.toString(movID);
+        Uri uri = MovieDbContract.MovieEntry.CONTENT_URI.buildUpon().appendPath(movieId).build();
+        Cursor cursor = getActivity().getContentResolver()
+                .query(MovieDbContract.MovieEntry.CONTENT_URI,
+                        null,
+                        "movie_id" + " = " + DatabaseUtils.sqlEscapeString(movieId),
+                        null,
+                        null);
+        if (cursor.getCount() != 0) {
+            favButton.setChecked(true);
+        }
+        cursor.close();
+
         favButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {

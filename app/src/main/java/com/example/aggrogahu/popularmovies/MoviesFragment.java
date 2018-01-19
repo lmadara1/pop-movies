@@ -1,10 +1,14 @@
 package com.example.aggrogahu.popularmovies;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Debug;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,6 +21,8 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
 
+import com.example.aggrogahu.popularmovies.data.MovieDbContract;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -28,6 +34,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+
+import static com.example.aggrogahu.popularmovies.data.MoviePreferences.getSorting;
 
 /**
  * Created by aggrogahu on 10/10/2016.
@@ -47,10 +55,12 @@ public class MoviesFragment extends Fragment {
         moviesTask.execute(sort);
     }
 
-//    TODO (5) make sure sorting preference persists after opening details and navigating back, as well as through rotating device
+//    COMPLETED (5) make sure sorting preference persists after opening details and navigating back, as well as through rotating device
+    // TODO (5) add favorites sorting option
     public void onStart(){
         super.onStart();
-        updateMovies("popular");
+        String sort = getSorting(getContext());
+        updateMovies(sort);
     }
 
     public MoviesFragment() {
@@ -70,15 +80,23 @@ public class MoviesFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences.Editor editor = sp.edit();
+        String sortingKey = getContext().getString(R.string.sorting_key);
+
         int id = item.getItemId();
         if (id == R.id.action_popular_sort){
+            editor.putString(sortingKey, "popular");
+            editor.commit();
             updateMovies("popular");
-            Log.v(LOG_TAG,"popular");
+//            Log.v(LOG_TAG,"popular");
             return true;
         }
         if (id == R.id.action_rating_sort){
+            editor.putString(sortingKey, "top_rated");
+            editor.commit();
             updateMovies("top_rated");
-            Log.v(LOG_TAG,"rop_tated");
+//            Log.v(LOG_TAG,"rop_tated");
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -112,55 +130,56 @@ public class MoviesFragment extends Fragment {
         });
         return rootView;
     }
+
+    private Movie[] getMovieDataFromJson(String movieJsonStr, String sort)
+            throws JSONException{
+
+        final String TMDB_RESULTS = "results";
+        final String TMDB_TITLE = "original_title";
+        final String TMDB_DATE = "release_date";
+        final String TMDB_POSTER = "poster_path";
+        final String TMDB_PLOT = "overview";
+        final String TMDB_ID = "id";
+        final String TMDB_VOTEAV = "vote_average";
+        int numMovs;
+
+        JSONObject moviesJson = new JSONObject(movieJsonStr);
+        JSONArray movieJsonArray = moviesJson.getJSONArray(TMDB_RESULTS);
+        numMovs = movieJsonArray.length();
+
+        Movie[] resultMovs = new Movie[numMovs];
+
+        for(int i = 0; i < movieJsonArray.length(); i++){
+            String title;
+            String releaseDate;
+            String poster;
+            String plot;
+            int mid;
+            int voteAverage;
+            String baseURL = "http://image.tmdb.org/t/p/w185";
+
+            // Get the JSON object representing the movie
+            JSONObject movieInfo = movieJsonArray.getJSONObject(i);
+
+            title = movieInfo.getString(TMDB_TITLE);
+            releaseDate = movieInfo.getString(TMDB_DATE);
+            poster = baseURL + movieInfo.getString(TMDB_POSTER);
+            plot = movieInfo.getString(TMDB_PLOT);
+            mid = movieInfo.getInt(TMDB_ID);
+            voteAverage = movieInfo.getInt(TMDB_VOTEAV);
+
+            // Debug to make sure we're getting the right information from the JSON
+            // Log.v(LOG_TAG, title + releaseDate + poster + plot);
+            resultMovs[i] = new Movie(title,releaseDate,poster,plot,mid,voteAverage);
+        }
+
+        return resultMovs;
+    }
+
 //  TODO (8) prolly should factor the FetchMoviesTask and AsyncTask to separate java file too
     public class FetchMoviesTask extends AsyncTask<String,Void,Movie[]>{
 
         private String sort;
-
-        private Movie[] getMovieDataFromJson(String movieJsonStr, String sort)
-                throws JSONException{
-
-            final String TMDB_RESULTS = "results";
-            final String TMDB_TITLE = "original_title";
-            final String TMDB_DATE = "release_date";
-            final String TMDB_POSTER = "poster_path";
-            final String TMDB_PLOT = "overview";
-            final String TMDB_ID = "id";
-            final String TMDB_VOTEAV = "vote_average";
-            int numMovs;
-
-            JSONObject moviesJson = new JSONObject(movieJsonStr);
-            JSONArray movieJsonArray = moviesJson.getJSONArray(TMDB_RESULTS);
-            numMovs = movieJsonArray.length();
-
-            Movie[] resultMovs = new Movie[numMovs];
-
-            for(int i = 0; i < movieJsonArray.length(); i++){
-                String title;
-                String releaseDate;
-                String poster;
-                String plot;
-                int mid;
-                Long voteAverage;
-                String baseURL = "http://image.tmdb.org/t/p/w185";
-
-                // Get the JSON object representing the movie
-                JSONObject movieInfo = movieJsonArray.getJSONObject(i);
-
-                title = movieInfo.getString(TMDB_TITLE);
-                releaseDate = movieInfo.getString(TMDB_DATE);
-                poster = baseURL + movieInfo.getString(TMDB_POSTER);
-                plot = movieInfo.getString(TMDB_PLOT);
-                mid = movieInfo.getInt(TMDB_ID);
-                voteAverage = movieInfo.getLong(TMDB_VOTEAV);
-
-                // Debug to make sure we're getting the right information from the JSON
-                // Log.v(LOG_TAG, title + releaseDate + poster + plot);
-                resultMovs[i] = new Movie(title,releaseDate,poster,plot,mid,voteAverage);
-            }
-
-            return resultMovs;
-        }
 
         @Override
         protected Movie[] doInBackground(String... params){
@@ -178,7 +197,27 @@ public class MoviesFragment extends Fragment {
             String format = "json";
             this.sort = params[0];
             Log.v("Sorting: ", sort);
-//            String sort = sort;//either "popular" or "top_rated"
+//            String sort = sort;//either "popular" or "top_rated" or "favorites"
+
+            // create Movie[] from favorites via ContentProvider
+            if (sort == "favorites") {
+                Cursor cursor = getActivity().getContentResolver()
+                        .query(MovieDbContract.MovieEntry.CONTENT_URI,
+                                null,
+                                null,
+                                null,
+                                null);
+                int mSize = cursor.getCount();
+                Movie[] movies = new Movie[mSize];
+                cursor.moveToFirst();
+                for (int i = 0; i < mSize; i++){
+                    // TODO (3) create array from cursor
+//                    movies[i] = cursor.getString("movie_id")
+                }
+
+                cursor.close();
+                return movies;
+            }
 
             try {
                 // Construct the URL for the API query
