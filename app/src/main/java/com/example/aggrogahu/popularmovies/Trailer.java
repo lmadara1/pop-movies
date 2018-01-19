@@ -7,6 +7,8 @@ import android.os.Parcelable;
  * Created by Leonard on 1/11/2018.
  */
 
+// TODO (8) refactor to a different package; Review and Movie class too
+
 public class Trailer implements Parcelable{
     String title;
     String youTubeKey;
