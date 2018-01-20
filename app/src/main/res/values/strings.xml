@@ -19,4 +19,5 @@
     <string name="save_as_favorite">Save as Favorite</string>
     <string name="unmark_as_favorite">Unmark as Favorite</string>
     <string name="sorting_key">sorting</string>
+    <string name="favorites_sort">Favorites</string>
 </resources>

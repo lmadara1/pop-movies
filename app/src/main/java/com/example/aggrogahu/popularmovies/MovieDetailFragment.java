@@ -15,15 +15,10 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-//import android.widget.ListAdapter;
-//import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.example.aggrogahu.popularmovies.data.MovieDbContract;
@@ -39,19 +34,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 
 /**
  * Fragment for movie details
  */
-//    COMPLETED (3) Create Content Provider
-//COMPLETED (3) movie reviews
-//    COMPLETED factor fragment out into separate java file
 public class MovieDetailFragment extends Fragment {
 
     private static final String LOG_TAG = MovieDetailFragment.class.getSimpleName();
 
-    private Movie mMovie;
     private String mTitle;
     private String mReleaseDate;
     private String mPoster;
@@ -59,17 +49,18 @@ public class MovieDetailFragment extends Fragment {
     private int movID;
     private int mVoteAverage;
 
-//    private TrailerAdapter mTrailerAdapter;
     private LinearLayout trailerLinearList;
     private LinearLayout reviewLinearList;
-//    private ArrayList<Trailer> trailerArrayList;
 
     public MovieDetailFragment() {
 //        setHasOptionsMenu(true);
     }
 
+    /**
+     * add a movie to favorites
+     */
     public void addFav(){
-        // create contentValues with movID
+        // create contentValues with movie information
         ContentValues contentValues = new ContentValues();
         contentValues.put(MovieDbContract.MovieEntry.COLUMN_MOVIE_ID, movID);
         contentValues.put(MovieDbContract.MovieEntry.COLUMN_MOVIE_TITLE, mTitle);
@@ -78,22 +69,23 @@ public class MovieDetailFragment extends Fragment {
         contentValues.put(MovieDbContract.MovieEntry.COLUMN_MOVIE_PLOT, mPlot);
         contentValues.put(MovieDbContract.MovieEntry.COLUMN_MOVIE_VOTE, mVoteAverage);
 
-        // Insert the via ContentResolver
-        Uri uri = getActivity().getContentResolver().insert(MovieDbContract.MovieEntry.CONTENT_URI, contentValues);
+        // Insert via ContentResolver
+        getActivity().getContentResolver().insert(MovieDbContract.MovieEntry.CONTENT_URI, contentValues);
 
-        if(uri != null) {
-//            Toast.makeText(getActivity(), uri.toString(), Toast.LENGTH_LONG).show();
-            Log.d("add Fav", "uri: " + uri);
-        }
     }
 
+    /**
+     * delete a movie from favorites
+     */
     public void deleteFav(){
         String movieId = Integer.toString(movID);
         Uri uri = MovieDbContract.MovieEntry.CONTENT_URI.buildUpon().appendPath(movieId).build();
-        Log.d("delete fav", "uri: " + uri);
         getActivity().getContentResolver().delete(uri, null, null);
     }
 
+    /**
+     * get trailers and review for the selected movie
+     */
     private void fetchTrailersReviews(){
         FetchTrailerTask trailerTask = new FetchTrailerTask();
         FetchReviewTask reviewTask = new FetchReviewTask();
@@ -102,6 +94,10 @@ public class MovieDetailFragment extends Fragment {
 
     }
 
+    /**
+     * Add trailer view to the trailer LinearLayout
+     * @param trailer the trailer to be added to the list
+     */
     private void addTrailer(final Trailer trailer){
         // limit to 5
         if(trailerLinearList.getChildCount() > 4){
@@ -116,7 +112,6 @@ public class MovieDetailFragment extends Fragment {
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Toast.makeText(getActivity(),trailer.title,Toast.LENGTH_SHORT).show();
                 String key = trailer.youTubeKey;
                 Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + key));
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.youtube.com/watch?v=" + key));
@@ -128,44 +123,48 @@ public class MovieDetailFragment extends Fragment {
 
             }
         });
-        //add view to list
 
+        //add view to list
         trailerLinearList.addView(view);
     }
+
+    /**
+     * Add review to the review LinearLayout
+     * @param review the review to be added to the list
+     */
     public void addReview(final Review review){
         // limit to 5
         if(reviewLinearList.getChildCount() > 4) {
             return;
         }
 
-        /* not yet implemented */
         // inflate list_item_trailer template
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.list_item_review, reviewLinearList, false);
         // set the username and content
         TextView userName = view.findViewById(R.id.review_author);
         TextView content = view.findViewById(R.id.review);
         TextView readMore = view.findViewById(R.id.read_more);
+        //TODO (5) use string resource for says text
         userName.setText(review.user + " says:");
         content.setText(review.review);
         // set onClickListener to open YouTube
         readMore.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Toast.makeText(getActivity(),trailer.title,Toast.LENGTH_SHORT).show();
                 String url = review.url;
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                 getActivity().startActivity(browserIntent);
 
             }
         });
+
         //add view to list
         reviewLinearList.addView(view);
-
-
     }
 
     public void onStart() {
         super.onStart();
+        // populate trailers and reviews lists
         fetchTrailersReviews();
     }
 
@@ -174,8 +173,6 @@ public class MovieDetailFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-//        fetchTrailersReviews();
-//        trailerArrayList = new ArrayList<Trailer>();
     }
 
     //    TODO (8) use Data Binding to clean up findViewById calls
@@ -186,19 +183,14 @@ public class MovieDetailFragment extends Fragment {
         // Inflate the layout for the movie detail fragment
         View rootView = inflater.inflate(R.layout.fragment_movie_detail, container, false);
 
-        // COMPLETED (3) change from ListView to LinearLayout
         // Find list view
         trailerLinearList = rootView.findViewById(R.id.trailer_list);
         reviewLinearList = rootView.findViewById(R.id.review_list);
 
-        // Setup adapter
-//        mTrailerAdapter = new TrailerAdapter(getActivity(),trailerArrayList);
-//        myListView.setAdapter(mTrailerAdapter);
-
         // The detail Activity called via intent.  Inspect the intent for movie data.
         Intent intent = getActivity().getIntent();
         if (intent != null && intent.hasExtra("Movie")) {
-            mMovie = intent.getExtras().getParcelable("Movie");
+            Movie mMovie = intent.getExtras().getParcelable("Movie");
             mTitle = mMovie.title;
             mReleaseDate = mMovie.releaseDate;
             mPoster = mMovie.poster;
@@ -209,13 +201,11 @@ public class MovieDetailFragment extends Fragment {
             ((TextView) rootView.findViewById(R.id.movie_title))
                     .setText(mTitle);
             ((TextView) rootView.findViewById(R.id.movie_date))
-                    .setText("Released: " + mReleaseDate);
+                    .setText("Released: " + mReleaseDate); //TODO use string resource for release text
             ImageView imageView = (rootView.findViewById(R.id.movie_poster));
             Picasso.with(getContext()).load(mPoster).resize(500,750).into(imageView);
             ((TextView) rootView.findViewById(R.id.movie_description))
                     .setText(mPlot);
-//            ((TextView) rootView.findViewById(R.id.movie_id))
-//                    .setText("ID: " + movID);
             ((TextView) rootView.findViewById(R.id.movie_rating))
                     .setText(mVoteAverage + "/10");
         }
@@ -225,7 +215,6 @@ public class MovieDetailFragment extends Fragment {
 
         // Check to see if the movie is already saved as a favorite
         String movieId = Integer.toString(movID);
-        Uri uri = MovieDbContract.MovieEntry.CONTENT_URI.buildUpon().appendPath(movieId).build();
         Cursor cursor = getActivity().getContentResolver()
                 .query(MovieDbContract.MovieEntry.CONTENT_URI,
                         null,
@@ -248,27 +237,6 @@ public class MovieDetailFragment extends Fragment {
             }
         });
 
-
-        // Launch Youtube app via intent
-//        myLinearList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//                                              @Override
-//                                              public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-//                                                  Trailer trailer = (Trailer) mTrailerAdapter.getItem(i);
-//                                                  String key = trailer.youTubeKey;
-//                                                  Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + key));
-//                                                  Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.youtube.com/watch?v=" + key));
-//
-//                                                  try {
-//                                                      getActivity().startActivity(appIntent);
-//                                                  } catch (ActivityNotFoundException e) {
-//                                                      getActivity().startActivity(browserIntent);
-//                                                  }
-//                                              }
-//                                          }
-//
-//
-//        );
-
         return rootView;
     }
 
@@ -278,7 +246,7 @@ public class MovieDetailFragment extends Fragment {
 
     }
 
-
+//    TODO (5) consolidate into one api call using append_to_response
     public class FetchTrailerTask extends AsyncTask<Void,Void,Trailer[]> {
 
         private Trailer[] getTrailersFromJson(String trailerJsonString)
@@ -286,21 +254,18 @@ public class MovieDetailFragment extends Fragment {
 
             final String TMDB_RESULTS = "results";
 
-            int numMovs;
+            int numTrailers;
 
             JSONObject trailersJson = new JSONObject(trailerJsonString);
             JSONArray trailersJsonJSONArray = trailersJson.getJSONArray(TMDB_RESULTS);
-            numMovs = trailersJsonJSONArray.length();
+            numTrailers = trailersJsonJSONArray.length();
 
-            Trailer[] resultTrailers = new Trailer[numMovs];
+            Trailer[] resultTrailers = new Trailer[numTrailers];
 
             for(int i = 0; i < trailersJsonJSONArray.length(); i++){
 
                 // Get the JSON object representing the trailers
                 JSONObject movieInfo = trailersJsonJSONArray.getJSONObject(i);
-
-                // Debug to make sure we're getting the right information from the JSON
-                // Log.v(LOG_TAG, title + releaseDate + poster + plot);
 
                 // Get the trailer name and key from JSON object
                 String key = movieInfo.getString("key");
@@ -323,11 +288,7 @@ public class MovieDetailFragment extends Fragment {
 
             // TODO (8) factor out api key so I don't have to manually remove/replace it when committing to github
             // URL parameters to create API call.
-            String apikey = ""; // Since sharing API keys publicly on github is frowned upon, I have removed the api key, insert your own here to ensure app works
-//                String format = "json";
-//                this.sort = params[0];
-//                Log.v("Sorting: ", sort);
-//            String sort = sort;//either "popular" or "top_rated"
+            String apiKey = ""; // Since sharing API keys publicly on github is frowned upon, I have removed the api key, insert your own here to ensure app works
 
             try {
                 // Construct the URL for the API query
@@ -338,7 +299,7 @@ public class MovieDetailFragment extends Fragment {
                         .appendPath("movie")
                         .appendPath(String.valueOf(movID))
                         .appendPath("videos")
-                        .appendQueryParameter("api_key",apikey)
+                        .appendQueryParameter("api_key",apiKey)
                 ;
                 Log.d("Moviez", builder.build().toString());
                 URL url = new URL(builder.build().toString());
@@ -388,8 +349,6 @@ public class MovieDetailFragment extends Fragment {
                     }
                 }
             }
-            //Debug to make sure the api call worked correctly, should return json with desired information
-            //Log.v(LOG_TAG, moviesJsonStr);
             try {
                 return getTrailersFromJson(moviesJsonStr);
             } catch (JSONException e) {
@@ -398,7 +357,6 @@ public class MovieDetailFragment extends Fragment {
             return null;
         }
 
-        //        COMPLETED (3) onPostExecute should update the ListView via notifying adapter
         @Override
         protected void onPostExecute(Trailer[] trailers) {
             super.onPostExecute(trailers);
@@ -410,13 +368,9 @@ public class MovieDetailFragment extends Fragment {
             } else {
                 tSize = trailers.length;
             }
-//            fetchTrailersReviews();
             for (int i=0; i<tSize; i++){
                 addTrailer(trailers[i]);
-//                trailerArrayList.add(trailers[i]);
             }
-//            mTrailerAdapter.notifyDataSetChanged();
-            //generate LinearLayout list
 
         }
     }
@@ -465,11 +419,7 @@ public class MovieDetailFragment extends Fragment {
 
             // TODO (8) factor out api key so I don't have to manually remove/replace it when committing to github
             // URL parameters to create API call.
-            String apikey = "787cb2f1e39c2dcc6fa5ae0612284c06"; // Since sharing API keys publicly on github is frowned upon, I have removed the api key, insert your own here to ensure app works
-//                String format = "json";
-//                this.sort = params[0];
-//                Log.v("Sorting: ", sort);
-//            String sort = sort;//either "popular" or "top_rated"
+            String apikey = ""; // Since sharing API keys publicly on github is frowned upon, I have removed the api key, insert your own here to ensure app works
 
             try {
                 // Construct the URL for the API query
@@ -530,8 +480,7 @@ public class MovieDetailFragment extends Fragment {
                     }
                 }
             }
-            //Debug to make sure the api call worked correctly, should return json with desired information
-            //Log.v(LOG_TAG, moviesJsonStr);
+
             try {
                 return getReviewsFromJson(reviewsJsonStr);
             } catch (JSONException e) {
@@ -540,7 +489,6 @@ public class MovieDetailFragment extends Fragment {
             return null;
         }
 
-        //        COMPLETED (3) onPostExecute should update the ListView via notifying adapter
         @Override
         protected void onPostExecute(Review[] reviews) {
             super.onPostExecute(reviews);
@@ -556,10 +504,8 @@ public class MovieDetailFragment extends Fragment {
 //            fetchTrailersReviews();
             for (int i=0; i<rSize; i++){
                 addReview(reviews[i]);
-//                trailerArrayList.add(trailers[i]);
             }
-//            mTrailerAdapter.notifyDataSetChanged();
-            //generate LinearLayout list
+
 
         }
     }
