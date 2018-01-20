@@ -26,11 +26,11 @@ public class MovieDbContract {
         // table and column names
         public static final String TABLE_NAME = "movies";
         public static final String COLUMN_MOVIE_ID = "movie_id";
-        public static final String COLUMN_MOVIE_TITLE = "title";
-        public static final String COLUMN_MOVIE_DATE = "date";
-        public static final String COLUMN_MOVIE_POSTER = "poster";
-        public static final String COLUMN_MOVIE_PLOT = "plot";
-        public static final String COLUMN_MOVIE_VOTE = "vote";
+        public static final String COLUMN_MOVIE_TITLE = "original_title";
+        public static final String COLUMN_MOVIE_DATE = "release_date";
+        public static final String COLUMN_MOVIE_POSTER = "poster_path";
+        public static final String COLUMN_MOVIE_PLOT = "overview";
+        public static final String COLUMN_MOVIE_VOTE = "vote_average";
 
     }
 }

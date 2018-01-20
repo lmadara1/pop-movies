@@ -42,15 +42,11 @@ public class MovieAdapter extends BaseAdapter{
             // if it's not recycled, initialize some attributes
             imageView = new ImageView(mContext);
             imageView.setAdjustViewBounds(true);
-//            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-//            imageView.setPadding(0, 0, 0, 0);
         } else {
             imageView = (ImageView) convertView;
         }
 
-//        Picasso.with(mContext).load("http://i.imgur.com/DvpvklR.png").into(imageView);
         Picasso.with(mContext).load(mMovieList.get(position).poster).into(imageView);
-//        imageView.setImageResource(mThumbIds[position]);
         return imageView;
     }
 

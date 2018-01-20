@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Debug;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -34,6 +35,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 import static com.example.aggrogahu.popularmovies.data.MoviePreferences.getSorting;
 
@@ -46,19 +49,28 @@ public class MoviesFragment extends Fragment {
 
     private final String LOG_TAG = MoviesFragment.class.getSimpleName();
 
-    private MovieAdapter mMovieAdapter;
+    private MovieAdapter mMovieAdapter;         //Adapter
     private ArrayList<Movie> movieArrayList;    //List that adapter will read data from
     private boolean apicall = false;            //Flag to indicate if api call succeeded or not
 
+
+    /**
+     * called from onStart and whenever GridView needs to be updated with new movies to display
+     * @param sort popular, top_rated, or favorites; first two use an api call, favorites just reads from content provider
+     */
     private void updateMovies(String sort){
-        FetchMoviesTask moviesTask = new FetchMoviesTask();
-        moviesTask.execute(sort);
+        if (sort.equals("favorites")){
+            showFavoriteMovies();
+        }
+        else {
+            FetchMoviesTask moviesTask = new FetchMoviesTask();
+            moviesTask.execute(sort);
+        }
     }
 
-//    COMPLETED (5) make sure sorting preference persists after opening details and navigating back, as well as through rotating device
-    // TODO (5) add favorites sorting option
     public void onStart(){
         super.onStart();
+        // Use MoviePreferences class function to retrieve sorting preference
         String sort = getSorting(getContext());
         updateMovies(sort);
     }
@@ -71,7 +83,7 @@ public class MoviesFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        movieArrayList = new ArrayList<Movie>();
+        movieArrayList = new ArrayList<>();
     }
 
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater){
@@ -80,30 +92,39 @@ public class MoviesFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
+        // get preference editor to make changes
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
         SharedPreferences.Editor editor = sp.edit();
         String sortingKey = getContext().getString(R.string.sorting_key);
 
         int id = item.getItemId();
+        // popular
         if (id == R.id.action_popular_sort){
             editor.putString(sortingKey, "popular");
-            editor.commit();
+            editor.apply();
             updateMovies("popular");
-//            Log.v(LOG_TAG,"popular");
             return true;
         }
+        // top rated
         if (id == R.id.action_rating_sort){
             editor.putString(sortingKey, "top_rated");
-            editor.commit();
+            editor.apply();
             updateMovies("top_rated");
-//            Log.v(LOG_TAG,"rop_tated");
             return true;
         }
+        // favorites
+        if (id == R.id.action_favorite_sort){
+            editor.putString(sortingKey, "favorites");
+            editor.apply();
+            updateMovies("favorites");
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
@@ -117,11 +138,10 @@ public class MoviesFragment extends Fragment {
 
         mMovieAdapter.notifyDataSetChanged();
 
-        // Launch Movie Details
+        // Setup click listener to launch movie details fragment
         myGridView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                //Toast.makeText(getActivity(),mForecastAdapter.getItem(i).toString(), Toast.LENGTH_SHORT).show();
                 Movie movie = (Movie) mMovieAdapter.getItem(i);
                 Intent detailIntent = new Intent(getActivity(),MovieDetailActivity.class)
                         .putExtra("Movie",movie);
@@ -131,49 +151,91 @@ public class MoviesFragment extends Fragment {
         return rootView;
     }
 
-    private Movie[] getMovieDataFromJson(String movieJsonStr, String sort)
+    /**
+     * convert Json from themoviedb api call to Movie[]
+     * @param movieJsonStr Json string to parse for movies
+     * @return Movie[] containing movies from api call results
+     * @throws JSONException when something goes wrong
+     */
+    private Movie[] getMovieDataFromJson(String movieJsonStr)
             throws JSONException{
 
         final String TMDB_RESULTS = "results";
-        final String TMDB_TITLE = "original_title";
-        final String TMDB_DATE = "release_date";
-        final String TMDB_POSTER = "poster_path";
-        final String TMDB_PLOT = "overview";
         final String TMDB_ID = "id";
-        final String TMDB_VOTEAV = "vote_average";
-        int numMovs;
+        int numMovies;
 
         JSONObject moviesJson = new JSONObject(movieJsonStr);
         JSONArray movieJsonArray = moviesJson.getJSONArray(TMDB_RESULTS);
-        numMovs = movieJsonArray.length();
+        numMovies = movieJsonArray.length();
 
-        Movie[] resultMovs = new Movie[numMovs];
+        Movie[] resultMovies = new Movie[numMovies];
+
+
 
         for(int i = 0; i < movieJsonArray.length(); i++){
-            String title;
-            String releaseDate;
-            String poster;
-            String plot;
-            int mid;
-            int voteAverage;
             String baseURL = "http://image.tmdb.org/t/p/w185";
 
             // Get the JSON object representing the movie
             JSONObject movieInfo = movieJsonArray.getJSONObject(i);
 
-            title = movieInfo.getString(TMDB_TITLE);
-            releaseDate = movieInfo.getString(TMDB_DATE);
-            poster = baseURL + movieInfo.getString(TMDB_POSTER);
-            plot = movieInfo.getString(TMDB_PLOT);
-            mid = movieInfo.getInt(TMDB_ID);
-            voteAverage = movieInfo.getInt(TMDB_VOTEAV);
+            String title = movieInfo.getString(MovieDbContract.MovieEntry.COLUMN_MOVIE_TITLE);
+            String releaseDate = movieInfo.getString(MovieDbContract.MovieEntry.COLUMN_MOVIE_DATE);
+            String poster = baseURL + movieInfo.getString(MovieDbContract.MovieEntry.COLUMN_MOVIE_POSTER);
+            String plot = movieInfo.getString(MovieDbContract.MovieEntry.COLUMN_MOVIE_PLOT);
+            int mid = movieInfo.getInt(TMDB_ID);
+            int voteAverage = movieInfo.getInt(MovieDbContract.MovieEntry.COLUMN_MOVIE_VOTE);
 
             // Debug to make sure we're getting the right information from the JSON
             // Log.v(LOG_TAG, title + releaseDate + poster + plot);
-            resultMovs[i] = new Movie(title,releaseDate,poster,plot,mid,voteAverage);
+            resultMovies[i] = new Movie(title,releaseDate,poster,plot,mid,voteAverage);
         }
 
-        return resultMovs;
+        return resultMovies;
+    }
+
+    /**
+     * update main GridView to display favorite movies
+     */
+    private void showFavoriteMovies(){
+            // retrieve cursor
+            Cursor cursor = getActivity().getContentResolver()
+                    .query(MovieDbContract.MovieEntry.CONTENT_URI,
+                            null,
+                            null,
+                            null,
+                            null);
+
+            // initialize array
+            int mSize = cursor.getCount();
+            cursor.moveToFirst();
+
+            // create array from cursor
+            int titleIndex = cursor.getColumnIndex(MovieDbContract.MovieEntry.COLUMN_MOVIE_TITLE);
+            int dateIndex = cursor.getColumnIndex(MovieDbContract.MovieEntry.COLUMN_MOVIE_DATE);
+            int posterIndex = cursor.getColumnIndex(MovieDbContract.MovieEntry.COLUMN_MOVIE_POSTER);
+            int plotIndex = cursor.getColumnIndex(MovieDbContract.MovieEntry.COLUMN_MOVIE_PLOT);
+            int mIdIndex = cursor.getColumnIndex(MovieDbContract.MovieEntry.COLUMN_MOVIE_ID);
+            int voteIndex = cursor.getColumnIndex(MovieDbContract.MovieEntry.COLUMN_MOVIE_VOTE);
+
+            movieArrayList.clear();
+            for (int i = 0; i < mSize; i++){
+                String title = cursor.getString(titleIndex);
+                String date = cursor.getString(dateIndex);
+                String poster = cursor.getString(posterIndex);
+                String plot = cursor.getString(plotIndex);
+                int mId = cursor.getInt(mIdIndex);
+                int vote = cursor.getInt(voteIndex);
+
+                Log.d("showFavoriteMovies", "title: " + title);
+                movieArrayList.add(new Movie(title,date,poster,plot,mId,vote));
+                cursor.moveToNext();
+            }
+            mMovieAdapter.notifyDataSetChanged();
+            // TODO (8) if there are no favorites saved, show a prompt as a view instead of a toast
+            if(movieArrayList.size()==0){
+                Toast.makeText(getContext(), "You have no favorites saved; choose a different sorting option from the menu", Toast.LENGTH_LONG).show();
+            }
+            cursor.close();
     }
 
 //  TODO (8) prolly should factor the FetchMoviesTask and AsyncTask to separate java file too
@@ -183,7 +245,7 @@ public class MoviesFragment extends Fragment {
 
         @Override
         protected Movie[] doInBackground(String... params){
-
+            // Making api call...
             // These two need to be declared outside the try/catch
             // so that they can be closed in the finally block.
             HttpURLConnection urlConnection = null;
@@ -193,31 +255,8 @@ public class MoviesFragment extends Fragment {
             String moviesJsonStr;
 
             // URL parameters to create API call.
-            String apikey = ""; // Since sharing API keys publicly on github is frowned upon, I have removed the api key, insert your own here to ensure app works
-            String format = "json";
+            String apiKey = ""; // Since sharing API keys publicly on github is frowned upon, I have removed the api key, insert your own here to ensure app works
             this.sort = params[0];
-            Log.v("Sorting: ", sort);
-//            String sort = sort;//either "popular" or "top_rated" or "favorites"
-
-            // create Movie[] from favorites via ContentProvider
-            if (sort == "favorites") {
-                Cursor cursor = getActivity().getContentResolver()
-                        .query(MovieDbContract.MovieEntry.CONTENT_URI,
-                                null,
-                                null,
-                                null,
-                                null);
-                int mSize = cursor.getCount();
-                Movie[] movies = new Movie[mSize];
-                cursor.moveToFirst();
-                for (int i = 0; i < mSize; i++){
-                    // TODO (3) create array from cursor
-//                    movies[i] = cursor.getString("movie_id")
-                }
-
-                cursor.close();
-                return movies;
-            }
 
             try {
                 // Construct the URL for the API query
@@ -227,7 +266,7 @@ public class MoviesFragment extends Fragment {
                         .appendPath("3")
                         .appendPath("movie")
                         .appendPath(sort)
-                        .appendQueryParameter("api_key",apikey)
+                        .appendQueryParameter("api_key",apiKey)
                 ;
                 Log.d("Moviez", builder.build().toString());
                 URL url = new URL(builder.build().toString());
@@ -239,6 +278,7 @@ public class MoviesFragment extends Fragment {
 
                 // Read the input stream into a String
                 InputStream inputStream = urlConnection.getInputStream();
+                // TODO (8) change to StringBuilder
                 StringBuffer buffer = new StringBuffer();
                 if (inputStream == null) {
                     // Nothing to do.
@@ -277,10 +317,8 @@ public class MoviesFragment extends Fragment {
                     }
                 }
             }
-            //Debug to make sure the api call worked correctly, should return json with desired information
-            //Log.v(LOG_TAG, moviesJsonStr);
             try {
-                return getMovieDataFromJson(moviesJsonStr,sort);
+                return getMovieDataFromJson(moviesJsonStr);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -289,15 +327,14 @@ public class MoviesFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Movie[] movies){
-            //TODO (8) update adapter error message
+            // update array and adapter
             if (apicall){
-                Toast.makeText(getActivity(),"API call failed, please insert your own API key, see README for details",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(),"API call failed",Toast.LENGTH_SHORT).show();
             }
+
             movieArrayList.clear();
             if(movies != null){
-            for (Movie m : movies){
-                movieArrayList.add(m);
-            }
+                Collections.addAll(movieArrayList,movies);
             }
             mMovieAdapter.notifyDataSetChanged();
         }

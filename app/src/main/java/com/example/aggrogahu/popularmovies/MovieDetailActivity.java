@@ -13,6 +13,8 @@ import com.facebook.stetho.Stetho;
  * Concepts from Sunshine App Udacity Project
  */
 
+//TODO (8) MovieDetailActivity might not be needed
+
 public class MovieDetailActivity extends AppCompatActivity {
 
     @Override
