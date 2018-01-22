@@ -301,7 +301,6 @@ public class MovieDetailFragment extends Fragment {
                         .appendPath("videos")
                         .appendQueryParameter("api_key",apiKey)
                 ;
-                Log.d("Moviez", builder.build().toString());
                 URL url = new URL(builder.build().toString());
 
                 // Create the request and open the connection
@@ -432,7 +431,6 @@ public class MovieDetailFragment extends Fragment {
                         .appendPath("reviews")
                         .appendQueryParameter("api_key",apikey)
                 ;
-                Log.d("Moviez", builder.build().toString());
                 URL url = new URL(builder.build().toString());
 
                 // Create the request and open the connection
