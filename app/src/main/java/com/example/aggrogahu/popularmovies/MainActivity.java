@@ -3,6 +3,7 @@ package com.example.aggrogahu.popularmovies;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -53,6 +54,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Log.d("Main", "onNewIntent");
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main,menu);
         return true;
@@ -79,17 +86,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        Log.d("Main", "onSaveInstanceState, fragments: " + getSupportFragmentManager().getFragments().size());
+        Log.d("Main", "onSaveInstanceState, # of fragments: " + getSupportFragmentManager().getFragments().size());
         super.onSaveInstanceState(outState);
         mFragment = getSupportFragmentManager().findFragmentById(R.id.main_container);
 
 //        Fragment movieFragment = getSupportFragmentManager();
         getSupportFragmentManager().putFragment(outState, FRAGMENT_STATE, mFragment);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.d("Main", "onDestroy");
     }
 }

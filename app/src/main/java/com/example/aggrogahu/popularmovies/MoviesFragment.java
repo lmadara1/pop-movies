@@ -71,15 +71,16 @@ public class MoviesFragment extends Fragment {
         }
     }
 
-    public void onStart(){
-        super.onStart();
+//    public void onStart(){
+//        super.onStart();
         // Use MoviePreferences class function to retrieve sorting preference
-        String sort = getSorting(getContext());
-        updateMovies(sort);
+//        String sort = getSorting(getContext());
+//        updateMovies(sort);
 //        myGridView.setSelection(9);
 //        myGridView.smoothScrollToPosition(9);
-        Log.d("Fragment", "onStart, gridView int: " + myGridView.getFirstVisiblePosition());
-    }
+//        mMovieAdapter.notifyDataSetChanged();
+//        Log.d("Fragment", "onStart, gridView int: " + myGridView.getFirstVisiblePosition());
+//    }
 
     public MoviesFragment() {
         // Required empty public constructor
@@ -97,6 +98,27 @@ public class MoviesFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         Log.d("Fragment", "onActivityCreated");
+
+                // COMPLETEED (3) restore instance: make sure scrolling position is maintained
+        if(savedInstanceState != null){
+            if(savedInstanceState.containsKey(GRID_VIEW_STATE)){
+                Parcelable state = savedInstanceState.getParcelable(GRID_VIEW_STATE);
+
+//                movieArrayList = savedInstanceState.getParcelableArrayList(MOVIE_ARRAY);
+//                Log.d("F", "movieArrayList: " +
+//                        movieArrayList.get(0).title + " " +
+//                        movieArrayList.get(0).poster);
+//                mMovieAdapter.notifyDataSetChanged();
+//                myGridView.setSelection(state);
+//                myGridView.smoothScrollToPosition(state);
+                myGridView.onRestoreInstanceState(state);
+                Log.d("F", "position: " + myGridView.getFirstVisiblePosition() + ", state: " + state);
+            }
+        }else {
+            String sort = getSorting(getContext());
+            updateMovies(sort);
+            Log.d("F", "nani mo inai");
+        }
     }
 
     @Override
@@ -152,7 +174,12 @@ public class MoviesFragment extends Fragment {
         // Find Grid View
         myGridView = rootView.findViewById(R.id.gridview_movies);
 
-
+        // If there's a savedInstance load that into array
+        if (savedInstanceState != null){
+            if(savedInstanceState.containsKey(MOVIE_ARRAY)){
+                movieArrayList = savedInstanceState.getParcelableArrayList(MOVIE_ARRAY);
+            }
+        }
 
         // Setup adapter
         mMovieAdapter = new MovieAdapter(getActivity(),movieArrayList);
@@ -174,7 +201,7 @@ public class MoviesFragment extends Fragment {
 //        String sort = getSorting(getContext());
 //        updateMovies(sort);
 
-//        // TODO (3) restore instance: make sure scrolling position is maintained
+//        // (3) restore instance: make sure scrolling position is maintained
 //        if(savedInstanceState != null){
 //            if(savedInstanceState.containsKey(GRID_VIEW_STATE)){
 //                int state = savedInstanceState.getInt(GRID_VIEW_STATE);
@@ -370,35 +397,38 @@ public class MoviesFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Movie[] movies){
+            Log.d("Fragment", "onPostExecute");
             // update array and adapter
             if (apiCall){
                 Toast.makeText(getActivity(),"API call failed",Toast.LENGTH_SHORT).show();
             }
-
-            // TODO (3) extract to a function
-            movieArrayList.clear();
-            if(movies != null){
-                Collections.addAll(movieArrayList,movies);
-            }
-            mMovieAdapter.notifyDataSetChanged();
-            Log.d("Fragment", "onPostExecute");
+            // extract to a function
+            displayMovies(movies);
         }
     }
 
+    private void displayMovies(Movie[] movies){
+        movieArrayList.clear();
+        if(movies != null){
+            Collections.addAll(movieArrayList,movies);
+        }
+        mMovieAdapter.notifyDataSetChanged();
+    }
     @Override
     public void onPause() {
         super.onPause();
-        Log.d("Fragment", "onPause, gridView int: " + myGridView.getFirstVisiblePosition());
+        Log.d("Fragment", "onPause");
     }
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-//        Parcelable state = myGridView.onSaveInstanceState();
-        int state = myGridView.getFirstVisiblePosition();
-        Log.d("Fragment", "onSaveInstance, saving int: " + state);
-        outState.putInt(GRID_VIEW_STATE,state);
+        Log.d("Fragment", "onSaveInstance");
+
+        // save gridView and arrayList into bundle
+        Parcelable state = myGridView.onSaveInstanceState();
         outState.putParcelableArrayList(MOVIE_ARRAY, movieArrayList);
+        outState.putParcelable(GRID_VIEW_STATE, state);
 
     }
 }

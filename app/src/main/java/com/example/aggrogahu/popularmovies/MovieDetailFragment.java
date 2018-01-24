@@ -9,10 +9,12 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.NavUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
@@ -174,6 +176,7 @@ public class MovieDetailFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
     }
+    
 
     //    TODO (8) use Data Binding to clean up findViewById calls
     @Override
@@ -245,12 +248,14 @@ public class MovieDetailFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 
     }
-
-//    TODO (5) consolidate into one api call using append_to_response
+    // TODO (3) save instance state so doesn't make unnecessary api call
+    //    TODO (5) consolidate into one api call using append_to_response
     public class FetchTrailerTask extends AsyncTask<Void,Void,Trailer[]> {
+
 
         private Trailer[] getTrailersFromJson(String trailerJsonString)
                 throws JSONException {
+            Log.d("Fetch", "stop it");
 
             final String TMDB_RESULTS = "results";
 

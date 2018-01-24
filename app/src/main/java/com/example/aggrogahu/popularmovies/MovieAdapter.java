@@ -1,6 +1,7 @@
 package com.example.aggrogahu.popularmovies;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -40,6 +41,7 @@ public class MovieAdapter extends BaseAdapter{
         ImageView imageView;
         if (convertView == null) {
             // if it's not recycled, initialize some attributes
+//            Log.d("Adapter", "getView: " + position);
             imageView = new ImageView(mContext);
             imageView.setAdjustViewBounds(true);
         } else {
