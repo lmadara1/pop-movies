@@ -88,7 +88,6 @@ public class MoviesFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.d("Fragment", "onCreate");
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         movieArrayList = new ArrayList<>();
@@ -97,10 +96,10 @@ public class MoviesFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        Log.d("Fragment", "onActivityCreated");
-
+        String sort = getSorting(getContext());
                 // COMPLETEED (3) restore instance: make sure scrolling position is maintained
-        if(savedInstanceState != null){
+        if(savedInstanceState != null && !sort.equals("favorites")){
+            Log.d("Frag", "not null not fav");
             if(savedInstanceState.containsKey(GRID_VIEW_STATE)){
                 Parcelable state = savedInstanceState.getParcelable(GRID_VIEW_STATE);
 
@@ -112,19 +111,11 @@ public class MoviesFragment extends Fragment {
 //                myGridView.setSelection(state);
 //                myGridView.smoothScrollToPosition(state);
                 myGridView.onRestoreInstanceState(state);
-                Log.d("F", "position: " + myGridView.getFirstVisiblePosition() + ", state: " + state);
             }
-        }else {
-            String sort = getSorting(getContext());
+        } else {
+            Log.d("Frag", "default");
             updateMovies(sort);
-            Log.d("F", "nani mo inai");
         }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.d("Fragment", "onDestroy");
     }
 
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater){
@@ -167,7 +158,6 @@ public class MoviesFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Log.d("Fragment", "onCreateView");
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
@@ -296,7 +286,6 @@ public class MoviesFragment extends Fragment {
                 int mId = cursor.getInt(mIdIndex);
                 int vote = cursor.getInt(voteIndex);
 
-                Log.d("showFavoriteMovies", "title: " + title);
                 movieArrayList.add(new Movie(title,date,poster,plot,mId,vote));
                 cursor.moveToNext();
             }
@@ -315,7 +304,6 @@ public class MoviesFragment extends Fragment {
 
         @Override
         protected Movie[] doInBackground(String... params){
-            Log.d("Fragment", "doInBackground");
             // Making api call...
             // These two need to be declared outside the try/catch
             // so that they can be closed in the finally block.
@@ -368,6 +356,7 @@ public class MoviesFragment extends Fragment {
                     // Stream was empty.  No point in parsing.
                     return null;
                 }
+                apiCall = false;
                 moviesJsonStr = buffer.toString();
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
@@ -397,10 +386,9 @@ public class MoviesFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Movie[] movies){
-            Log.d("Fragment", "onPostExecute");
             // update array and adapter
             if (apiCall){
-                Toast.makeText(getActivity(),"API call failed",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(),"API call failed",Toast.LENGTH_LONG).show();
             }
             // extract to a function
             displayMovies(movies);
@@ -414,16 +402,10 @@ public class MoviesFragment extends Fragment {
         }
         mMovieAdapter.notifyDataSetChanged();
     }
-    @Override
-    public void onPause() {
-        super.onPause();
-        Log.d("Fragment", "onPause");
-    }
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        Log.d("Fragment", "onSaveInstance");
 
         // save gridView and arrayList into bundle
         Parcelable state = myGridView.onSaveInstanceState();

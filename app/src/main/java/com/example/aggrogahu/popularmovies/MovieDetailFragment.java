@@ -8,6 +8,7 @@ import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NavUtils;
 import android.util.Log;
@@ -36,6 +37,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Fragment for movie details
@@ -51,8 +54,19 @@ public class MovieDetailFragment extends Fragment {
     private int movID;
     private int mVoteAverage;
 
+    private boolean apicall = false;
+    private static final String apikey = ""; // Since sharing API keys publicly on github is frowned upon, I have removed the api key, insert your own here to ensure app works
+
     private LinearLayout trailerLinearList;
     private LinearLayout reviewLinearList;
+    private ArrayList<Trailer> trailerArray = new ArrayList<>();
+    private ArrayList<Review> reviewArray = new ArrayList<>();
+
+    private static final String TRAILER_ARRAY = "trailersKey";
+    private static final String REVIEW_ARRAY = "reviewsKey";
+
+
+
 
     public MovieDetailFragment() {
 //        setHasOptionsMenu(true);
@@ -105,6 +119,7 @@ public class MovieDetailFragment extends Fragment {
         if(trailerLinearList.getChildCount() > 4){
             return;
         }
+
         // inflate list_item_trailer template
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.list_item_trailer, trailerLinearList, false);
         // set the trailer_title
@@ -126,6 +141,9 @@ public class MovieDetailFragment extends Fragment {
             }
         });
 
+//        //add to reference array
+//        trailerArray.add(trailer);
+
         //add view to list
         trailerLinearList.addView(view);
     }
@@ -135,19 +153,14 @@ public class MovieDetailFragment extends Fragment {
      * @param review the review to be added to the list
      */
     public void addReview(final Review review){
-        // limit to 5
-        if(reviewLinearList.getChildCount() > 4) {
-            return;
-        }
-
         // inflate list_item_trailer template
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.list_item_review, reviewLinearList, false);
         // set the username and content
         TextView userName = view.findViewById(R.id.review_author);
         TextView content = view.findViewById(R.id.review);
         TextView readMore = view.findViewById(R.id.read_more);
-        //TODO (5) use string resource for says text
-        userName.setText(review.user + " says:");
+        //COMPLETED (5) use string resource for says text
+        userName.setText(review.user + getString(com.example.aggrogahu.popularmovies.R.string.says));
         content.setText(review.review);
         // set onClickListener to open YouTube
         readMore.setOnClickListener(new View.OnClickListener() {
@@ -159,7 +172,6 @@ public class MovieDetailFragment extends Fragment {
 
             }
         });
-
         //add view to list
         reviewLinearList.addView(view);
     }
@@ -167,7 +179,7 @@ public class MovieDetailFragment extends Fragment {
     public void onStart() {
         super.onStart();
         // populate trailers and reviews lists
-        fetchTrailersReviews();
+//        fetchTrailersReviews();
     }
 
 
@@ -204,13 +216,13 @@ public class MovieDetailFragment extends Fragment {
             ((TextView) rootView.findViewById(R.id.movie_title))
                     .setText(mTitle);
             ((TextView) rootView.findViewById(R.id.movie_date))
-                    .setText("Released: " + mReleaseDate); //TODO use string resource for release text
+                    .setText(getString(R.string.released) + mReleaseDate); //COMPLETED use string resource for release text
             ImageView imageView = (rootView.findViewById(R.id.movie_poster));
             Picasso.with(getContext()).load(mPoster).resize(500,750).into(imageView);
             ((TextView) rootView.findViewById(R.id.movie_description))
                     .setText(mPlot);
             ((TextView) rootView.findViewById(R.id.movie_rating))
-                    .setText(mVoteAverage + "/10");
+                    .setText(mVoteAverage + getString(R.string.rating_scale));
         }
 
         // Setup add favorite button
@@ -240,6 +252,19 @@ public class MovieDetailFragment extends Fragment {
             }
         });
 
+        if(savedInstanceState!=null) {
+            if (savedInstanceState.containsKey(REVIEW_ARRAY)
+                    && savedInstanceState.containsKey(TRAILER_ARRAY)){
+                reviewArray = savedInstanceState.getParcelableArrayList(REVIEW_ARRAY);
+                trailerArray = savedInstanceState.getParcelableArrayList(TRAILER_ARRAY);
+                updateReviewArray(reviewArray);
+                updateTrailerArray(trailerArray);
+            }
+//            fetchTrailersReviews();
+        } else {
+            fetchTrailersReviews();
+        }
+
         return rootView;
     }
 
@@ -248,14 +273,13 @@ public class MovieDetailFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 
     }
-    // TODO (3) save instance state so doesn't make unnecessary api call
+    // COMPLETED (3) save instance state so doesn't make unnecessary api call
     //    TODO (5) consolidate into one api call using append_to_response
     public class FetchTrailerTask extends AsyncTask<Void,Void,Trailer[]> {
 
 
         private Trailer[] getTrailersFromJson(String trailerJsonString)
                 throws JSONException {
-            Log.d("Fetch", "stop it");
 
             final String TMDB_RESULTS = "results";
 
@@ -293,7 +317,6 @@ public class MovieDetailFragment extends Fragment {
 
             // TODO (8) factor out api key so I don't have to manually remove/replace it when committing to github
             // URL parameters to create API call.
-            String apiKey = ""; // Since sharing API keys publicly on github is frowned upon, I have removed the api key, insert your own here to ensure app works
 
             try {
                 // Construct the URL for the API query
@@ -304,7 +327,7 @@ public class MovieDetailFragment extends Fragment {
                         .appendPath("movie")
                         .appendPath(String.valueOf(movID))
                         .appendPath("videos")
-                        .appendQueryParameter("api_key",apiKey)
+                        .appendQueryParameter("api_key",apikey)
                 ;
                 URL url = new URL(builder.build().toString());
 
@@ -334,10 +357,11 @@ public class MovieDetailFragment extends Fragment {
                     // Stream was empty.  No point in parsing.
                     return null;
                 }
+                apicall = false;
                 moviesJsonStr = buffer.toString();
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
-//                    apicall = true;
+                    apicall = true;
                 // If the code didn't successfully get the data, there's no point in attemping
                 // to parse it.
                 return null;
@@ -364,19 +388,42 @@ public class MovieDetailFragment extends Fragment {
         @Override
         protected void onPostExecute(Trailer[] trailers) {
             super.onPostExecute(trailers);
-            trailerLinearList.removeAllViews();
-            // limit to 5
-            int tSize;
-            if (trailers.length > 5){
-                tSize = 5;
-            } else {
-                tSize = trailers.length;
+            ArrayList<Trailer> returnTrailers = new ArrayList<>();
+            if (trailers != null){
+                Collections.addAll(returnTrailers, trailers);
             }
-            for (int i=0; i<tSize; i++){
-                addTrailer(trailers[i]);
-            }
+            trailerArray = updateTrailerArray(returnTrailers);
+
+//            // limit to 5
+//            int tSize;
+//            if (trailers.length > 5){
+//                tSize = 5;
+//            } else {
+//                tSize = trailers.length;
+//            }
+//            for (int i=0; i<tSize; i++){
+//                addTrailer(trailers[i]);
+//            }
 
         }
+    }
+
+    private ArrayList<Trailer> updateTrailerArray(ArrayList<Trailer> trailers){
+        ArrayList<Trailer> returnTrailers = new ArrayList<>();
+        trailerLinearList.removeAllViews();
+        // limit to 5
+        int tSize;
+        if (trailers.size() > 5){
+            tSize = 5;
+        } else {
+            tSize = trailers.size();
+        }
+        for (int i=0; i<tSize; i++){
+            Trailer trailer = trailers.get(i);
+            returnTrailers.add(trailer);
+            addTrailer(trailer);
+        }
+        return returnTrailers;
     }
     public class FetchReviewTask extends AsyncTask<Void,Void,Review[]> {
 
@@ -423,7 +470,6 @@ public class MovieDetailFragment extends Fragment {
 
             // TODO (8) factor out api key so I don't have to manually remove/replace it when committing to github
             // URL parameters to create API call.
-            String apikey = ""; // Since sharing API keys publicly on github is frowned upon, I have removed the api key, insert your own here to ensure app works
 
             try {
                 // Construct the URL for the API query
@@ -464,10 +510,11 @@ public class MovieDetailFragment extends Fragment {
                     // Stream was empty.  No point in parsing.
                     return null;
                 }
+                apicall = false;
                 reviewsJsonStr = buffer.toString();
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
-//                    apicall = true;
+                    apicall = true;
                 // If the code didn't successfully get the data, there's no point in attemping
                 // to parse it.
                 return null;
@@ -495,21 +542,54 @@ public class MovieDetailFragment extends Fragment {
         @Override
         protected void onPostExecute(Review[] reviews) {
             super.onPostExecute(reviews);
-            //limit to 5
-            reviewLinearList.removeAllViews();
-            int rSize;
-            if (reviews.length > 5){
-                rSize = 5;
-            } else {
-                rSize = reviews.length;
+//            TODO (5) improve error catching in instance of null
+            ArrayList<Review> returnReview = new ArrayList<>();
+            if (reviews != null) {
+                Collections.addAll(returnReview, reviews);
             }
-
-//            fetchTrailersReviews();
-            for (int i=0; i<rSize; i++){
-                addReview(reviews[i]);
-            }
-
+            reviewArray = updateReviewArray(returnReview);
+//            //limit to 5
+//            reviewLinearList.removeAllViews();
+//            int rSize;
+//            if (reviews.length > 5){
+//                rSize = 5;
+//            } else {
+//                rSize = reviews.length;
+//            }
+//
+////            fetchTrailersReviews();
+//            for (int i=0; i<rSize; i++){
+//                addReview(reviews[i]);
+//            }
 
         }
+    }
+
+    private ArrayList<Review> updateReviewArray(ArrayList<Review> reviews){
+        reviewLinearList.removeAllViews();
+        ArrayList<Review> returnReviews = new ArrayList<>();
+//        reviewArray.clear();
+        //limit to 5
+        int rSize;
+        if (reviews.size() > 5){
+            rSize = 5;
+        } else {
+            rSize = reviews.size();
+        }
+
+//            fetchTrailersReviews();
+        for (int i=0; i<rSize; i++){
+            Review review = reviews.get(i);
+            returnReviews.add(review);
+            addReview(review);
+        }
+        return returnReviews;
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(TRAILER_ARRAY, trailerArray);
+        outState.putParcelableArrayList(REVIEW_ARRAY, reviewArray);
     }
 }

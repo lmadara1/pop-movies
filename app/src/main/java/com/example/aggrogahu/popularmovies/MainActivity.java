@@ -23,19 +23,14 @@ public class MainActivity extends AppCompatActivity {
 //        Log.d("Main", "onCreate, fragments: " + getSupportFragmentManager().getFragments().size());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.d("Main", "onCreate, fragments: " + getSupportFragmentManager().getFragments().size());
         if (savedInstanceState == null){
-            Log.d("M", "null");
-//            setContentView(R.layout.activity_main);
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.main_container, new MoviesFragment())
                     .commit();
         } else {
             Log.d("M", "something saved");
-//            setContentView(R.layout.activity_main);
             mFragment = getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT_STATE);
             if (mFragment.isAdded()) {
-                Log.d("M", "nothing to add");
                 return;
             }else {
                 Log.d("M", "else");
@@ -51,12 +46,6 @@ public class MainActivity extends AppCompatActivity {
                 Stetho.newInitializerBuilder(context)
                         .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(context))
                         .build());//*/
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        Log.d("Main", "onNewIntent");
     }
 
     @Override
@@ -86,11 +75,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        Log.d("Main", "onSaveInstanceState, # of fragments: " + getSupportFragmentManager().getFragments().size());
         super.onSaveInstanceState(outState);
         mFragment = getSupportFragmentManager().findFragmentById(R.id.main_container);
-
-//        Fragment movieFragment = getSupportFragmentManager();
         getSupportFragmentManager().putFragment(outState, FRAGMENT_STATE, mFragment);
     }
 }
