@@ -1,6 +1,7 @@
 package com.example.aggrogahu.popularmovies;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -40,17 +41,14 @@ public class MovieAdapter extends BaseAdapter{
         ImageView imageView;
         if (convertView == null) {
             // if it's not recycled, initialize some attributes
+//            Log.d("Adapter", "getView: " + position);
             imageView = new ImageView(mContext);
             imageView.setAdjustViewBounds(true);
-//            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-//            imageView.setPadding(0, 0, 0, 0);
         } else {
             imageView = (ImageView) convertView;
         }
 
-//        Picasso.with(mContext).load("http://i.imgur.com/DvpvklR.png").into(imageView);
         Picasso.with(mContext).load(mMovieList.get(position).poster).into(imageView);
-//        imageView.setImageResource(mThumbIds[position]);
         return imageView;
     }
 
