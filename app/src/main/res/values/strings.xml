@@ -20,4 +20,7 @@
     <string name="unmark_as_favorite">Unmark as Favorite</string>
     <string name="sorting_key">sorting</string>
     <string name="favorites_sort">Favorites</string>
+    <string name="says">says:</string>
+    <string name="released">Released:</string>
+    <string name="rating_scale">/10</string>
 </resources>

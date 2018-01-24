@@ -2,7 +2,9 @@ package com.example.aggrogahu.popularmovies;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -38,16 +40,20 @@ public class MovieDetailActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+//        // Handle action bar item clicks here. The action bar will
+//        // automatically handle clicks on the Home/Up button, so long
+//        // as you specify a parent activity in AndroidManifest.xml.
+//
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-//            startActivity(new Intent(this, SettingsActivity.class));
-            return true;
-        }
+        Log.d("Detail", "item id: " + id + " home: " + R.id.home + " or " + R.id.homeAsUp);
+//
+//        //noinspection SimplifiableIfStatement
+//        if (id == R.id.home) {
+//            Log.d("Detail", "why");
+//            NavUtils.navigateUpFromSameTask(this);
+////            startActivity(new Intent(this, SettingsActivity.class));
+//            return true;
+//        }
 
         return super.onOptionsItemSelected(item);
     }

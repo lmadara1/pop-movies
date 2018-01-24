@@ -3,13 +3,13 @@ package com.example.aggrogahu.popularmovies;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Debug;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -35,7 +35,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 
 import static com.example.aggrogahu.popularmovies.data.MoviePreferences.getSorting;
@@ -49,9 +48,13 @@ public class MoviesFragment extends Fragment {
 
     private final String LOG_TAG = MoviesFragment.class.getSimpleName();
 
+    private static final String GRID_VIEW_STATE = "gridview";               //
+    private static final String MOVIE_ARRAY = "movies";
+
     private MovieAdapter mMovieAdapter;         //Adapter
     private ArrayList<Movie> movieArrayList;    //List that adapter will read data from
-    private boolean apicall = false;            //Flag to indicate if api call succeeded or not
+    private boolean apiCall = false;            //Flag to indicate if api call succeeded or not
+    private GridView myGridView;
 
 
     /**
@@ -68,12 +71,16 @@ public class MoviesFragment extends Fragment {
         }
     }
 
-    public void onStart(){
-        super.onStart();
+//    public void onStart(){
+//        super.onStart();
         // Use MoviePreferences class function to retrieve sorting preference
-        String sort = getSorting(getContext());
-        updateMovies(sort);
-    }
+//        String sort = getSorting(getContext());
+//        updateMovies(sort);
+//        myGridView.setSelection(9);
+//        myGridView.smoothScrollToPosition(9);
+//        mMovieAdapter.notifyDataSetChanged();
+//        Log.d("Fragment", "onStart, gridView int: " + myGridView.getFirstVisiblePosition());
+//    }
 
     public MoviesFragment() {
         // Required empty public constructor
@@ -84,6 +91,31 @@ public class MoviesFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         movieArrayList = new ArrayList<>();
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        String sort = getSorting(getContext());
+                // COMPLETEED (3) restore instance: make sure scrolling position is maintained
+        if(savedInstanceState != null && !sort.equals("favorites")){
+            Log.d("Frag", "not null not fav");
+            if(savedInstanceState.containsKey(GRID_VIEW_STATE)){
+                Parcelable state = savedInstanceState.getParcelable(GRID_VIEW_STATE);
+
+//                movieArrayList = savedInstanceState.getParcelableArrayList(MOVIE_ARRAY);
+//                Log.d("F", "movieArrayList: " +
+//                        movieArrayList.get(0).title + " " +
+//                        movieArrayList.get(0).poster);
+//                mMovieAdapter.notifyDataSetChanged();
+//                myGridView.setSelection(state);
+//                myGridView.smoothScrollToPosition(state);
+                myGridView.onRestoreInstanceState(state);
+            }
+        } else {
+            Log.d("Frag", "default");
+            updateMovies(sort);
+        }
     }
 
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater){
@@ -130,7 +162,14 @@ public class MoviesFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         // Find Grid View
-        GridView myGridView = rootView.findViewById(R.id.gridview_movies);
+        myGridView = rootView.findViewById(R.id.gridview_movies);
+
+        // If there's a savedInstance load that into array
+        if (savedInstanceState != null){
+            if(savedInstanceState.containsKey(MOVIE_ARRAY)){
+                movieArrayList = savedInstanceState.getParcelableArrayList(MOVIE_ARRAY);
+            }
+        }
 
         // Setup adapter
         mMovieAdapter = new MovieAdapter(getActivity(),movieArrayList);
@@ -148,6 +187,27 @@ public class MoviesFragment extends Fragment {
                 startActivity(detailIntent);
             }
         });
+
+//        String sort = getSorting(getContext());
+//        updateMovies(sort);
+
+//        // (3) restore instance: make sure scrolling position is maintained
+//        if(savedInstanceState != null){
+//            if(savedInstanceState.containsKey(GRID_VIEW_STATE)){
+//                int state = savedInstanceState.getInt(GRID_VIEW_STATE);
+////                myGridView.smoothScrollToPosition(state);
+//                movieArrayList.clear();
+//                movieArrayList = savedInstanceState.getParcelableArrayList(MOVIE_ARRAY);
+//                Log.d("F", "movieArrayList: " + movieArrayList.get(1).title);
+//                mMovieAdapter.notifyDataSetChanged();
+//                myGridView.setSelection(state);
+//                Log.d("F", "position: " + myGridView.getFirstVisiblePosition() + ", state: " + state);
+//            }
+//        }else {
+//            String sort = getSorting(getContext());
+//            updateMovies(sort);
+//            Log.d("F", "nani mo inai");
+//        }
         return rootView;
     }
 
@@ -226,7 +286,6 @@ public class MoviesFragment extends Fragment {
                 int mId = cursor.getInt(mIdIndex);
                 int vote = cursor.getInt(voteIndex);
 
-                Log.d("showFavoriteMovies", "title: " + title);
                 movieArrayList.add(new Movie(title,date,poster,plot,mId,vote));
                 cursor.moveToNext();
             }
@@ -268,7 +327,6 @@ public class MoviesFragment extends Fragment {
                         .appendPath(sort)
                         .appendQueryParameter("api_key",apiKey)
                 ;
-                Log.d("Moviez", builder.build().toString());
                 URL url = new URL(builder.build().toString());
 
                 // Create the request and open the connection
@@ -298,10 +356,11 @@ public class MoviesFragment extends Fragment {
                     // Stream was empty.  No point in parsing.
                     return null;
                 }
+                apiCall = false;
                 moviesJsonStr = buffer.toString();
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
-                apicall = true;
+                apiCall = true;
                 // If the code didn't successfully get the data, there's no point in attemping
                 // to parse it.
                 return null;
@@ -328,15 +387,30 @@ public class MoviesFragment extends Fragment {
         @Override
         protected void onPostExecute(Movie[] movies){
             // update array and adapter
-            if (apicall){
-                Toast.makeText(getActivity(),"API call failed",Toast.LENGTH_SHORT).show();
+            if (apiCall){
+                Toast.makeText(getActivity(),"API call failed",Toast.LENGTH_LONG).show();
             }
-
-            movieArrayList.clear();
-            if(movies != null){
-                Collections.addAll(movieArrayList,movies);
-            }
-            mMovieAdapter.notifyDataSetChanged();
+            // extract to a function
+            displayMovies(movies);
         }
+    }
+
+    private void displayMovies(Movie[] movies){
+        movieArrayList.clear();
+        if(movies != null){
+            Collections.addAll(movieArrayList,movies);
+        }
+        mMovieAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        // save gridView and arrayList into bundle
+        Parcelable state = myGridView.onSaveInstanceState();
+        outState.putParcelableArrayList(MOVIE_ARRAY, movieArrayList);
+        outState.putParcelable(GRID_VIEW_STATE, state);
+
     }
 }
